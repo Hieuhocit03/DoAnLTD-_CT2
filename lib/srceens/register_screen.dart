@@ -1,83 +1,100 @@
 import 'package:flutter/material.dart';
-import '../database/database_helper.dart';
 
-class RegisterScreen extends StatefulWidget {
-  @override
-  _RegisterScreenState createState() => _RegisterScreenState();
-}
-
-class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String name = '';
-  String email = '';
-  String password = '';
-  String phone = '';
-
-  void _register() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      // Lưu thông tin vào SQLite
-      DatabaseHelper dbHelper = DatabaseHelper.instance;
-      try {
-        await dbHelper.insertUser({
-          'name': name,
-          'email': email,
-          'password': password,
-          'phone': phone,
-        });
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Đăng ký thành công')));
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Email đã tồn tại')));
-      }
-    }
-  }
-
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Khởi tạo các TextEditingController
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController phoneController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Đăng ký'),
+        title: const Text('Đăng Ký'),
+        backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Tên'),
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập tên' : null,
-                onSaved: (value) => name = value!,
+              const SizedBox(height: 20),
+              const Text(
+                'Tạo tài khoản mới',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập email' : null,
-                onSaved: (value) => email = value!,
+              const SizedBox(height: 20),
+              // Trường nhập tên người dùng
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Tên người dùng',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                ),
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Mật khẩu'),
+              const SizedBox(height: 16),
+              // Trường nhập email
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Trường nhập mật khẩu
+              TextField(
+                controller: passwordController,
                 obscureText: true,
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
-                onSaved: (value) => password = value!,
+                decoration: const InputDecoration(
+                  labelText: 'Mật khẩu',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Số điện thoại'),
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập số điện thoại' : null,
-                onSaved: (value) => phone = value!,
+              const SizedBox(height: 16),
+              // Trường nhập số điện thoại
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              // Nút đăng ký
               ElevatedButton(
-                onPressed: _register,
-                child: Text('Đăng ký'),
+                onPressed: () {
+                  // Xử lý logic đăng ký (ví dụ: gọi API)
+                  print('Tên: \${nameController.text}');
+                  print('Email: \${emailController.text}');
+                  print('Mật khẩu: \${passwordController.text}');
+                  print('Số điện thoại: \${phoneController.text}');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Đăng ký thành công!')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+                child: const Text('Đăng Ký'),
+              ),
+              const SizedBox(height: 10),
+              // Nút quay lại đăng nhập
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Quay lại trang trước
+                },
+                child: const Text('Đã có tài khoản? Đăng nhập'),
               ),
             ],
           ),

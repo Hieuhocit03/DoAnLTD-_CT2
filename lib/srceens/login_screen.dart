@@ -1,68 +1,106 @@
 import 'package:flutter/material.dart';
-import '../database/database_helper.dart';
+import '../srceens/register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String email = '';
-  String password = '';
-
-  void _login() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      // Xác thực thông tin từ SQLite
-      DatabaseHelper dbHelper = DatabaseHelper.instance;
-      var user = await dbHelper.getUser(email, password);
-
-      if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Đăng nhập thành công')));
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Email hoặc mật khẩu sai')));
-      }
-    }
-  }
-
+class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Đăng nhập'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập email' : null,
-                onSaved: (value) => email = value!,
+              SizedBox(height: 50),
+              // Logo của shop
+              Center(
+                child: Image.network(
+                  'https://via.placeholder.com/150',
+                  width: 150,
+                  height: 150,
+                ),
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Mật khẩu'),
-                obscureText: true,
-                validator: (value) =>
-                value!.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
-                onSaved: (value) => password = value!,
+              SizedBox(height: 30),
+              Text(
+                'Đăng Nhập',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
+              // Trường nhập email
+              TextField(
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Trường nhập mật khẩu
+              TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Mật khẩu',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Nút đăng nhập
               ElevatedButton(
-                onPressed: _login,
-                child: Text('Đăng nhập'),
+                onPressed: () {
+                  // Xử lý đăng nhập ở đây
+                },
+                child: Text('Đăng Nhập'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  textStyle: TextStyle(fontSize: 16),
+                ),
+              ),
+              SizedBox(height: 10),
+              // Liên kết đến trang quên mật khẩu
+              TextButton(
+                onPressed: () {
+                  // Điều hướng đến trang quên mật khẩu
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen()));
+                },
+                child: Text('Quên mật khẩu?'),
+              ),
+              SizedBox(height: 10),
+              // Liên kết đến trang đăng ký
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Chưa có tài khoản?'),
+                  TextButton(
+                    onPressed: () {
+                      // Điều hướng đến trang đăng ký
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
+                    },
+                    child: Text('Đăng ký ngay'),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+
+class ForgotPasswordScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Quên Mật Khẩu')),
+      body: Center(
+        child: Text('Trang quên mật khẩu'),
       ),
     );
   }
