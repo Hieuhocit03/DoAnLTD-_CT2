@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'home_screen.dart';
 class CarDetailScreen extends StatelessWidget {
   @override
+  final Map<String, dynamic> car;
+  CarDetailScreen({required this.car});
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(),
+            ),
+          )
         ),
         actions: [
           IconButton(
@@ -38,7 +46,7 @@ class CarDetailScreen extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg'),
+          image: NetworkImage('${car['image']}'),
           fit: BoxFit.cover,
         ),
       ),
@@ -52,19 +60,38 @@ class CarDetailScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Toyota CAMRY',
+            car['name'],
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
+          SizedBox(height: 5),
+          Text(
+            '20:30 | 25 tháng 12, 2024',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.blueGrey,
+            ),
+          ),
           SizedBox(height: 8),
           Text(
-            'Xe mới ra nên chạy ít lắm, bà con coi mua lek không hết xe nhé',
+            car['description'],
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey,
             ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            car['price'],
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.blueGrey,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.right,
           ),
         ],
       ),
@@ -76,10 +103,10 @@ class CarDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildSpecificationRow('Brand', 'Toyota'),
-          _buildSpecificationRow('Model', 'Sedan'),
-          _buildSpecificationRow('Color', 'Gray'),
-          _buildSpecificationRow('Year', '2024'),
+          _buildSpecificationRow('Hãng', '${car['brand']}'),
+          _buildSpecificationRow('Dòng', '${car['model']}'),
+          _buildSpecificationRow('Màu', '${car['color']}'),
+          _buildSpecificationRow('Năm sản xuất', '${car['year']}'),
         ],
       ),
     );
@@ -106,8 +133,16 @@ class CarDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16),
       child: ElevatedButton(
         onPressed: () => _showSellerInfoDialog(context),
-        child: Text('Book Now'),
+        child: Text(
+          'ĐẶT NGAY',
+          style: TextStyle(
+            //fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueGrey,
           minimumSize: Size(double.infinity, 50),
         ),
       ),
@@ -124,11 +159,11 @@ class CarDetailScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage('seller_avatar_url'),
+                backgroundImage: NetworkImage('${car['sellerImage']}'),
               ),
               SizedBox(height: 16),
               Text(
-                'John Doe',
+                car['sellerName'],
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -137,21 +172,28 @@ class CarDetailScreen extends StatelessWidget {
               SizedBox(height: 16),
               _buildContactRow(
                 icon: Icons.phone,
-                text: '+1 (123) 456-7890',
-                onTap: () => _launchPhone('+11234567890'),
+                text: car['phone'],
+                onTap: () => _launchPhone(car['phone']),
               ),
               SizedBox(height: 8),
               _buildContactRow(
                 icon: Icons.email,
-                text: 'johndoe@example.com',
-                onTap: () => _launchEmail('johndoe@example.com'),
+                text: car['email'],
+                onTap: () => _launchEmail(car['email']),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
             ),
           ],
         );

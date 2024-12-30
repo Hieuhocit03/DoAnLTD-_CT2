@@ -1,5 +1,8 @@
 import 'package:do_an_app/srceens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'car_screen.dart';
+import 'add_car_screen.dart';
+import 'seach_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -31,6 +34,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'brand': 'Toyota',
       'year': 2018,
       'description': 'Xe gia đình, bảo dưỡng định kỳ, nội thất đẹp.',
+      'model': 'Sedan',
+      'color': 'Gray',
+      'sellerName': 'Phát',
+      'phone': '0334551345',
+      'email': 'vuthanhphat2003@gmail.com',
+      'image': 'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+      'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
     },
     {
       'name': 'Mazda 3',
@@ -38,6 +48,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'brand': 'Mazda',
       'year': 2020,
       'description': 'Xe mới đi 20,000 km, không va chạm, bảo hành chính hãng.',
+      'model': 'Sedan',
+      'color': 'Black',
+      'sellerName': 'Thinh',
+      'phone': '0334551675',
+      'email': 'thinh@gmail.com',
+      'image': 'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
     },
     {
       'name': 'Kia Morning',
@@ -45,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'brand': 'Kia',
       'year': 2019,
       'description': 'Xe nhỏ gọn, tiết kiệm nhiên liệu, phù hợp với gia đình nhỏ.',
+      'model': 'Sedan',
+      'color': 'Gray',
     },
     {
       'name': 'Honda Civic',
@@ -52,6 +71,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'brand': 'Honda',
       'year': 2021,
       'description': 'Xe mới tinh, không có va chạm, bảo hành đầy đủ.',
+      'model': 'Sedan',
+      'color': 'Gray',
     },
   ];
 
@@ -73,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           indicatorColor: Colors.blue,
           tabs: [
             Tab(text: 'Danh sách xe'),
-            Tab(text: 'Liên hệ cửa hàng'),
+            Tab(text: 'Xe yêu thích'),
           ],
         ),
       )
@@ -102,13 +123,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           // Tìm kiếm
           Center(
             child: Text(
-              'Đây là trang tìm kiếm',
+              'Đây là trang tìm kiếm mới',
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
           ),
 
           // Thêm bài đăng
-          _buildAddOptions(),
+          Center(
+            child: Text(
+              'Đây là trang đăng bán xe',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ),
 
           // Cá nhân
           Center(
@@ -122,41 +148,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
-          if (index == 2) { // Khi nhấn nút Thêm
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.person),
-                        title: Text('Đăng bài bán xe mọi người'),
-                        onTap: () {
-                          Navigator.pop(context); // Đóng modal
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => AddPostScreen(type: 'Mọi người')),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.store),
-                        title: Text('Đăng bài bán xe cho chủ cửa hàng'),
-                        onTap: () {
-                          Navigator.pop(context); // Đóng modal
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => AddPostScreen(type: 'Chủ cửa hàng')),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+          if (index == 1) { // Khi nhấn nút Thêm
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SearchScreen()),
+            );
+          }else if (index == 2) { // Khi nhấn nút Thêm
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddCarScreen()),
             );
           } else if (index == 3) { // Mục Cá nhân
             Navigator.push(
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12.0),
-                  leading: Icon(Icons.directions_car, size: 40, color: Colors.blue),
+                  leading: _buildCarImage(car['image']),
                   title: Text(
                     car['name'],
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -228,6 +228,50 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
         _buildPagination(),
       ],
+    );
+  }
+  Widget _buildCarImage(String imageUrl) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey[300],
+              child: Icon(
+                Icons.directions_car,
+                color: Colors.grey[600],
+                size: 40,
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -260,73 +304,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildAddOptions() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => AddPostScreen(type: 'Mọi người')));
-            },
-            child: Text('Đăng bài bán xe mọi người'),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => AddPostScreen(type: 'Chủ cửa hàng')));
-            },
-            child: Text('Đăng bài bán xe cho chủ cửa hàng'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
-class AddPostScreen extends StatelessWidget {
-  final String type;
 
-  AddPostScreen({required this.type});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Đăng bài ($type)')),
-      body: Center(
-        child: Text(
-          'Trang đăng bài ($type)',
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-    );
-  }
-}
 
-class CarDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> car;
-
-  CarDetailScreen({required this.car});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(car['name'])),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(car['name'], style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Giá: ${car['price']}'),
-            Text('Hãng: ${car['brand']}'),
-            Text('Năm: ${car['year']}'),
-            SizedBox(height: 16),
-            Text('Mô tả: ${car['description']}'),
-          ],
-        ),
-      ),
-    );
-  }
-}
