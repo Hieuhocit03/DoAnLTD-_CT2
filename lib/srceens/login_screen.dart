@@ -6,7 +6,7 @@ import 'dart:convert';
 
 class LoginScreen extends StatelessWidget {
 
-  final String apiUrl = "http://localhost:3000/api/users/login";
+  final String apiUrl = "http://10.0.2.2:3000/api/users/login";
 
   Future<void> login(String email, String password, BuildContext context) async {
     try {
