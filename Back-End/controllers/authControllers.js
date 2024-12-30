@@ -83,13 +83,13 @@ export const loginUser = (req, res) => {
     // Đăng nhập thành công
     return res.status(200).json({
       message: "Đăng nhập thành công",
-      user: {
-        id: user.user_id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      },
+      // user: {
+      //   id: user.user_id,
+      //   name: user.name,
+      //   email: user.email,
+      //   role: user.role,
+      //   status: user.status,
+      // },
     });
   });
 };

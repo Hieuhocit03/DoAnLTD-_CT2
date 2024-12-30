@@ -1,6 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatelessWidget {
+
+  final String apiUrl = "http://localhost:3000/api/users/register";
+
+  Future<void> register(String name, String email, String password, String phone, BuildContext context) async {
+    try {
+      // Gửi request POST đến API
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'phone': phone,
+        }),
+      );
+
+      // Kiểm tra phản hồi từ API
+      if (response.statusCode == 201) {
+        var data = jsonDecode(response.body);
+        print('Đăng ký thành công: $data');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đăng ký thành công!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        ); // Quay lại màn hình trước (login)
+      } else {
+        print('Đăng ký thất bại: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đăng ký thất bại: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      print('Lỗi kết nối: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể kết nối tới máy chủ')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Khởi tạo các TextEditingController
@@ -73,14 +120,12 @@ class RegisterScreen extends StatelessWidget {
               // Nút đăng ký
               ElevatedButton(
                 onPressed: () {
+                  String name = nameController.text;
+                  String email = emailController.text;
+                  String password = passwordController.text;
+                  String phone = phoneController.text;
                   // Xử lý logic đăng ký (ví dụ: gọi API)
-                  print('Tên: \${nameController.text}');
-                  print('Email: \${emailController.text}');
-                  print('Mật khẩu: \${passwordController.text}');
-                  print('Số điện thoại: \${phoneController.text}');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đăng ký thành công!')),
-                  );
+                  register(name, email, password, phone, context);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
