@@ -1,6 +1,6 @@
 import 'package:do_an_app/srceens/profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'car_screen.dart';
+import 'car_detail_screen.dart';
 import 'add_car_screen.dart';
 import 'seach_screen.dart';
 
@@ -20,7 +20,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
-
+  // Phương thức để làm mới danh sách xe
+  Future<void> _refreshCarList() async {
+    // Giả lập việc tải lại dữ liệu
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      // Cập nhật danh sách xe (có thể gọi API ở đây)
+      // Ví dụ: cars = fetchCarsFromApi();
+    });
+  }
   @override
   void dispose() {
     _tabController.dispose();
@@ -39,7 +47,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'sellerName': 'Phát',
       'phone': '0334551345',
       'email': 'vuthanhphat2003@gmail.com',
-      'image': 'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+      'location': '38 Đ. Thảo Điền, Thảo Điền, Quận 2, Hồ Chí Minh, Vietnam',
+      'coverImage': 'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+      'detailImage': [
+         'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+          'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      ],
       'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
     },
     {
@@ -53,27 +66,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'sellerName': 'Thinh',
       'phone': '0334551675',
       'email': 'thinh@gmail.com',
-      'image': 'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      'location': 'Linh Tây, Thủ Đức',
+      'coverImage': 'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      'detailImage': [
+        'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+        'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      ],
       'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
     },
-    {
-      'name': 'Kia Morning',
-      'price': '400 triệu',
-      'brand': 'Kia',
-      'year': 2019,
-      'description': 'Xe nhỏ gọn, tiết kiệm nhiên liệu, phù hợp với gia đình nhỏ.',
-      'model': 'Sedan',
-      'color': 'Gray',
-    },
-    {
-      'name': 'Honda Civic',
-      'price': '800 triệu',
-      'brand': 'Honda',
-      'year': 2021,
-      'description': 'Xe mới tinh, không có va chạm, bảo hành đầy đủ.',
-      'model': 'Sedan',
-      'color': 'Gray',
-    },
+
   ];
 
   @override
@@ -151,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           if (index == 1) { // Khi nhấn nút Thêm
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => SearchScreen()),
+              MaterialPageRoute(builder: (_) => SearchScreen(cars: cars)),
             );
           }else if (index == 2) { // Khi nhấn nút Thêm
             Navigator.push(
@@ -159,6 +160,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               MaterialPageRoute(builder: (_) => AddCarScreen()),
             );
           } else if (index == 3) { // Mục Cá nhân
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ProfileScreen()),
+            );
+          } else if (index == 4) { // Mục Cá nhân
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => ProfileScreen()),
@@ -173,6 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Tìm kiếm'),
           BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: 'Thêm'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Thông báo'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
         ],
         selectedItemColor: Colors.blue,
@@ -182,16 +189,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildCarList() {
-    final paginatedCars = cars.skip((currentPage - 1) * itemsPerPage).take(itemsPerPage).toList();
-
     return Column(
       children: [
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16.0),
-            itemCount: paginatedCars.length,
+            itemCount: cars.length, // Hiển thị tất cả các xe
             itemBuilder: (context, index) {
-              final car = paginatedCars[index];
+              final car = cars[index]; // Dùng trực tiếp danh sách cars
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 decoration: BoxDecoration(
@@ -207,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12.0),
-                  leading: _buildCarImage(car['image']),
+                  leading: _buildCarImage(car['coverImage']),
                   title: Text(
                     car['name'],
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -226,10 +231,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
           ),
         ),
-        _buildPagination(),
       ],
     );
   }
+
   Widget _buildCarImage(String imageUrl) {
     return Container(
       width: 80,
@@ -275,34 +280,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildPagination() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        TextButton(
-          onPressed: currentPage > 1
-              ? () {
-            setState(() {
-              currentPage--;
-            });
-          }
-              : null,
-          child: Text('Trước'),
-        ),
-        Text('Trang $currentPage'),
-        TextButton(
-          onPressed: currentPage * itemsPerPage < cars.length
-              ? () {
-            setState(() {
-              currentPage++;
-            });
-          }
-              : null,
-          child: Text('Sau'),
-        ),
-      ],
-    );
-  }
+  // Widget _buildPagination() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       TextButton(
+  //         onPressed: currentPage > 1
+  //             ? () {
+  //           setState(() {
+  //             currentPage--;
+  //           });
+  //         }
+  //             : null,
+  //         child: Text('Trước'),
+  //       ),
+  //       Text('Trang $currentPage'),
+  //       TextButton(
+  //         onPressed: currentPage * itemsPerPage < cars.length
+  //             ? () {
+  //           setState(() {
+  //             currentPage++;
+  //           });
+  //         }
+  //             : null,
+  //         child: Text('Sau'),
+  //       ),
+  //     ],
+  //   );
+  // }
 
 
 }

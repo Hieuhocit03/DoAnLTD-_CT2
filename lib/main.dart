@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-//import 'srceens/car_screen.dart';
+//import 'srceens/car_detail_screen.dart';
 import 'srceens/home_screen.dart';
 //import 'srceens/login_screen.dart';
 //import 'srceens/register_screen.dart';

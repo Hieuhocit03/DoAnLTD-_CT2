@@ -12,12 +12,9 @@ class CarDetailScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(),
-            ),
-          )
+          onPressed: () {
+            Navigator.pop(context); // Quay lại màn hình trước đó
+          },
         ),
         actions: [
           IconButton(
@@ -32,7 +29,9 @@ class CarDetailScreen extends StatelessWidget {
           children: [
             _buildCarImageSection(),
             _buildCarDetailsSection(),
+
             _buildSpecificationsSection(),
+            _buildCarImageSection2(),
           ],
         ),
       ),
@@ -46,7 +45,7 @@ class CarDetailScreen extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('${car['image']}'),
+          image: NetworkImage('${car['coverImage']}'),
           fit: BoxFit.cover,
         ),
       ),
@@ -83,15 +82,17 @@ class CarDetailScreen extends StatelessWidget {
               color: Colors.grey,
             ),
           ),
-          SizedBox(height: 16),
-          Text(
-            car['price'],
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.blueGrey,
-              fontWeight: FontWeight.bold,
+          SizedBox(height: 25),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              car['price'],
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.blueGrey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            textAlign: TextAlign.right,
           ),
         ],
       ),
@@ -112,6 +113,7 @@ class CarDetailScreen extends StatelessWidget {
     );
   }
 
+
   Widget _buildSpecificationRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -128,13 +130,106 @@ class CarDetailScreen extends StatelessWidget {
     );
   }
 
+  void _showEnlargedImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.8),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(10),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  boundaryMargin: EdgeInsets.all(80),
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      image: DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Nút đóng (tùy chọn)
+              Positioned(
+                top: 0,
+                left: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueGrey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: Offset(0, 3), // Đổ bóng theo hướng x và y
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  Widget _buildCarImageSection2() {
+    if (car['detailImage'] != null && car['detailImage'].isNotEmpty) {
+      return Container(
+        height: 250,
+        width: double.infinity,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: car['detailImage'].length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => _showEnlargedImage(context, car['detailImage'][index]),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                width: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.0),
+                  image: DecorationImage(
+                    image: NetworkImage(car['detailImage'][index]),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
+
   Widget _buildBottomActionBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
       child: ElevatedButton(
         onPressed: () => _showSellerInfoDialog(context),
         child: Text(
-          'ĐẶT NGAY',
+          'MUA NGAY',
           style: TextStyle(
             //fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -148,12 +243,20 @@ class CarDetailScreen extends StatelessWidget {
       ),
     );
   }
+
   void _showSellerInfoDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Seller Information'),
+          title: Text(
+            textAlign: TextAlign.center,
+            'Seller Information',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -178,8 +281,14 @@ class CarDetailScreen extends StatelessWidget {
               SizedBox(height: 8),
               _buildContactRow(
                 icon: Icons.email,
-                text: car['email'],
+                text: car['email'].length > 25 ? car['email'].substring(0, 25) + '...' : car['email'],
                 onTap: () => _launchEmail(car['email']),
+              ),
+              SizedBox(height: 8),
+              _buildContactRow(
+                icon: Icons.location_on,
+                text: car['location'].length > 25 ? car['location'].substring(0, 25) + '...' : car['location'],
+                onTap: () => _launchLocation(car['location']),
               ),
             ],
           ),
@@ -187,7 +296,7 @@ class CarDetailScreen extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Close',
+                'Đóng',
                 style: TextStyle(
                   color: Colors.blueGrey,
                   fontWeight: FontWeight.bold,
@@ -225,6 +334,7 @@ class CarDetailScreen extends StatelessWidget {
     );
   }
 
+
 // Phương thức gọi điện thoại
   void _launchPhone(String phoneNumber) async {
     final Uri phoneUri = Uri.parse('tel:$phoneNumber');
@@ -245,6 +355,31 @@ class CarDetailScreen extends StatelessWidget {
     }
   }
 
+  void _launchLocation(String location) async {
+    // Mã hóa địa chỉ để sử dụng trong URL
+    String encodedLocation = Uri.encodeComponent(location);
 
+    // URL của Google Maps
+    final Uri mapUri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$encodedLocation'
+    );
+
+    try {
+      // Kiểm tra và mở URL
+      if (await canLaunchUrl(mapUri)) {
+        await launchUrl(
+          mapUri,
+          mode: LaunchMode.externalApplication, // Mở trực tiếp trong ứng dụng Google Maps
+        );
+      } else {
+        // Xử lý khi không thể mở Maps
+        print('Không thể mở bản đồ. Vui lòng kiểm tra ứng dụng Google Maps');
+      }
+    } catch (e) {
+      // Xử lý lỗi
+      print('Lỗi khi mở bản đồ: $e');
+
+    }
+  }
 
 }
