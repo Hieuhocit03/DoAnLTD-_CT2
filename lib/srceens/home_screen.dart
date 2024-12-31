@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final List<Map<String, dynamic>> cars = [
     {
       'name': 'Toyota Camry',
+      'time': '20:30 | 25 tháng 12, 2024',
       'price': '700 triệu',
       'brand': 'Toyota',
       'year': 2018,
@@ -57,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     },
     {
       'name': 'Mazda 3',
+      'time': '20:30 | 31 tháng 12, 2024',
       'price': '600 triệu',
       'brand': 'Mazda',
       'year': 2020,

@@ -67,7 +67,7 @@ class CarDetailScreen extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            '20:30 | 25 tháng 12, 2024',
+            car['time'],
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,

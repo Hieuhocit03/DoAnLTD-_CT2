@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'car_detail_screen.dart';
-
+import 'home_screen.dart';
 class SearchScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cars;
 
@@ -9,7 +9,6 @@ class SearchScreen extends StatefulWidget {
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
-
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
