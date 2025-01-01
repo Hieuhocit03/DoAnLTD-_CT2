@@ -1,6 +1,9 @@
 import 'package:do_an_app/srceens/test_login.dart';
 import 'package:flutter/material.dart';
+
+//import 'srceens/car_detail_screen.dart';
 import 'srceens/home_screen.dart';
+
 import 'srceens/login_screen.dart';
 import 'srceens/register_screen.dart';
 import 'srceens/Car_Input_Form.dart';
@@ -25,3 +28,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
