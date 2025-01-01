@@ -1,5 +1,6 @@
 import 'package:do_an_app/srceens/user_list_admin.dart';
 import 'package:do_an_app/srceens/user_unlock_admin.dart';
+import 'package:do_an_app/srceens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeAdminPage extends StatefulWidget {
@@ -15,8 +16,14 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      // Logic for navigating between tabs if needed
     });
+
+    if (index == 1) { // Index 1 tương ứng với "Cài đặt"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen()), // Điều hướng tới ProfileScreen
+      );
+    }
   }
 
   @override
@@ -46,8 +53,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   onTap: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => UserListPage())
-                    );
+                        MaterialPageRoute(
+                            builder: (context) => UserListPage()));
                   },
                 ),
                 ListTile(
@@ -55,8 +62,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   onTap: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => LockUnlockUserPage())
-                    );
+                        MaterialPageRoute(
+                            builder: (context) => LockUnlockUserPage()));
                   },
                 ),
               ],
