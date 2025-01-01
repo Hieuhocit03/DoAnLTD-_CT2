@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../srceens/test_login.dart';
+import 'home_screen.dart';
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AuthChoiceScreen()),
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
                 );
               },
               child: Text('Đăng Xuất'),
