@@ -83,7 +83,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
               },
               children: [
                 ListTile(
-                  title: Text('Duyệt bài viết'),
+                  title: Text('Danh sách bài viết'),
                   onTap: () {
                     // Navigate to post approval page
                   },
