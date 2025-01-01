@@ -50,94 +50,111 @@ class LoginScreen extends StatelessWidget {
     final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: 50),
-              // Logo của shop
-              Center(
-                child: Image.network(
-                  'https://via.placeholder.com/150',
-                  width: 150,
-                  height: 150,
+      body: Stack(
+        children: [
+          // Hình nền
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/image/bg-login.png'), // Đường dẫn tới hình nền
+                fit: BoxFit.cover, // Bao phủ toàn bộ vùng
+                colorFilter: ColorFilter.mode(
+                  Color.fromRGBO(255, 255, 255, 0.4), // Màu trắng với độ trong suốt 60%
+                  BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
                 ),
               ),
-              SizedBox(height: 30),
-              Text(
-                'Đăng Nhập',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              // Trường nhập email
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              SizedBox(height: 16),
-              // Trường nhập mật khẩu
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Mật khẩu',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Nút đăng nhập
-              ElevatedButton(
-                onPressed: () {
-                  // Xử lý đăng nhập ở đây
-                  String email = emailController.text;
-                  String password = passwordController.text;
-                  // Gọi hàm đăng nhập khi người dùng nhấn nút
-                  login(email, password, context);
-                },
-                child: Text('Đăng Nhập'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
-              ),
-              SizedBox(height: 10),
-              // Liên kết đến trang quên mật khẩu
-              TextButton(
-                onPressed: () {
-                  // Điều hướng đến trang quên mật khẩu
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen()));
-                },
-                child: Text('Quên mật khẩu?'),
-              ),
-              SizedBox(height: 10),
-              // Liên kết đến trang đăng ký
-              Row(
+            ),
+          ),
+          // Nội dung chính
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Chưa có tài khoản?'),
+                  SizedBox(height: 100),
+                  // Hình đại diện
+                  Center(
+                    child: CircleAvatar(
+                      radius: 75, // Kích thước hình đại diện
+                      backgroundImage: AssetImage('assets/image/bg-dn.png'),
+                      backgroundColor: Colors.transparent, // Đảm bảo không có nền đè
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Text(
+                    'Đăng Nhập',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  // Trường nhập email
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
+                      filled: true,
+
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Trường nhập mật khẩu
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Mật khẩu',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                      filled: true,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // Nút đăng nhập
+                  ElevatedButton(
+                    onPressed: () {
+                      String email = emailController.text;
+                      String password = passwordController.text;
+                      // Gọi hàm xử lý đăng nhập
+                    },
+                    child: Text('Đăng Nhập',style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      textStyle: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
-                      // Điều hướng đến trang đăng ký
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
+                      // Điều hướng đến trang quên mật khẩu
                     },
-                    child: Text('Đăng ký ngay'),
+                    child: Text('Quên mật khẩu?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Chưa có tài khoản?', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () {
+                          // Điều hướng đến trang đăng ký
+                        },
+                        child: Text('Đăng ký ngay',style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
