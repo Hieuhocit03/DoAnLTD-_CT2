@@ -91,4 +91,66 @@ class ApiService {
       return [];
     }
   }
+
+  Future<List<Brand>> fetchCarBrands() async {
+    try {
+      final response = await http.get(Uri.parse('${baseUrl}brands'));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((brandJson) => Brand.fromJson(brandJson)).toList();
+      } else {
+        throw Exception('Không thể tải danh sách hãng xe.');
+      }
+    } catch (error) {
+      throw Exception('Đã xảy ra lỗi khi tải dữ liệu: $error');
+    }
+  }
+
+  // Gửi yêu cầu đăng bán xe
+  Future<http.Response> postCarData(Car car) async {
+    final Uri url = Uri.parse('${baseUrl}cars');
+
+    var carJson = car.toJson();
+    var response = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(carJson));
+
+    if (response.statusCode == 201) {
+      // Nếu thành công, trả về response
+      return response;
+    } else {
+      // Nếu có lỗi, trả về một response với mã lỗi và thông báo lỗi
+      return http.Response('Lỗi khi thêm xe', response.statusCode);
+    }
+  }
+
+  Future<http.Response> postCarConditionData(CarCondition carCondition) async {
+    final Uri url = Uri.parse('http://localhost:3000/api/car-conditions');
+
+    var carConditionJson = carCondition.toJson();
+    var response = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(carConditionJson));
+
+    return response;
+  }
+
+  Future<http.Response> postCarSpecifications(
+      CarSpecification carSpecification) async {
+    final Uri url = Uri.parse('http://localhost:3000/api/car-specifications');
+
+    // Chuyển đổi đối tượng CarSpecification thành JSON
+    var carSpecificationJson = carSpecification.toJson();
+
+    // Gửi yêu cầu POST đến API
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(carSpecificationJson),
+    );
+
+    // Trả về phản hồi
+    return response;
+  }
 }
