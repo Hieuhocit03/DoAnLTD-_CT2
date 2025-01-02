@@ -5,7 +5,7 @@ import 'login_screen.dart';
 import '../models/user.dart';
 
 class RegisterScreen extends StatelessWidget {
-  final String apiUrl = "http://10.0.2.2:3000/api/users/register";
+  final String apiUrl = "http://localhost:3000/api/users/register";
 
   Future<void> register(User user, BuildContext context) async {
     try {

@@ -1,10 +1,13 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+// lib/screens/add_car_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/car.dart';
 import '../models/brand.dart';
+import '../services/api_service.dart';
+import 'dart:convert';
+import 'car_input_form.dart';
 
 class AddCarScreen extends StatefulWidget {
   const AddCarScreen({Key? key}) : super(key: key);
@@ -14,56 +17,40 @@ class AddCarScreen extends StatefulWidget {
 }
 
 class _AddCarScreenState extends State<AddCarScreen> {
-  // Controllers cho các trường nhập liệu
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _brandController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _locationController =
-      TextEditingController(); // Controller for location
-
-  // Biến lưu trữ hình ảnh
+  final TextEditingController _locationController = TextEditingController();
   File? _imageFile;
 
   List<Brand> _carBrands = [];
   bool _isLoading = true;
 
+  ApiService _apiService = ApiService();
+
   @override
   void initState() {
     super.initState();
-    _fetchCarBrands(); // Gọi API khi màn hình được khởi tạo
+    _fetchCarBrands();
   }
 
   Future<void> _fetchCarBrands() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/api/brands'));
-
-      if (response.statusCode == 200) {
-        // Nếu thành công, parse dữ liệu từ API
-        List<dynamic> data = json.decode(response.body);
-        setState(() {
-          // Chuyển đổi dữ liệu JSON thành danh sách các đối tượng Brand
-          _carBrands =
-              data.map((brandJson) => Brand.fromJson(brandJson)).toList();
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-        _showErrorDialog('Không thể tải danh sách hãng xe.');
-      }
+      List<Brand> brands = await _apiService.fetchCarBrands();
+      setState(() {
+        _carBrands = brands;
+        _isLoading = false;
+      });
     } catch (error) {
       setState(() {
         _isLoading = false;
       });
-      _showErrorDialog('Đã xảy ra lỗi khi tải dữ liệu.');
+      _showErrorDialog(error.toString());
     }
   }
 
-  // Chọn hình ảnh từ nguồn
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
@@ -73,7 +60,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
     }
   }
 
-  // Hiển thị bottom sheet chọn ảnh
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
@@ -104,13 +90,11 @@ class _AddCarScreenState extends State<AddCarScreen> {
     );
   }
 
-  // Xác nhận và gửi thông tin xe
   Future<void> _submitCarInfo() async {
     if (_validateInputs()) {
       Car car = Car(
         name: _nameController.text,
-        brandId: int.parse(
-            _brandController.text), // Lấy brand_id từ _brandController
+        brandId: int.parse(_brandController.text),
         year: int.parse(_yearController.text),
         price: double.parse(_priceController.text),
         status: 'Chờ duyệt',
@@ -122,12 +106,23 @@ class _AddCarScreenState extends State<AddCarScreen> {
         updatedAt: DateTime.now(),
       );
 
-      // Gửi dữ liệu lên API
-      var response = await _postCarData(car);
+      var response = await _apiService.postCarData(car);
 
       if (response.statusCode == 201) {
+        // Lấy carId từ body của response
+        var responseData = json.decode(response.body);
+        var carId = responseData['carId'];
+        print('Car ID: $carId');
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Đăng bán xe thành công!')));
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CarConditionForm(
+                carId: carId), // Truyền carId vào CarConditionForm
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Lỗi: ${response.body}')));
@@ -135,7 +130,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
     }
   }
 
-  // Kiểm tra tính hợp lệ của dữ liệu
   bool _validateInputs() {
     if (_nameController.text.isEmpty) {
       _showErrorDialog('Vui lòng nhập tên xe');
@@ -157,14 +151,9 @@ class _AddCarScreenState extends State<AddCarScreen> {
       _showErrorDialog('Vui lòng nhập địa chỉ');
       return false;
     }
-    if (_brandController.text.isEmpty) {
-      _showErrorDialog('Vui lòng chọn hãng xe');
-      return false;
-    }
     return true;
   }
 
-  // Hiển thị dialog lỗi
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -185,20 +174,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
     );
   }
 
-  // Gửi yêu cầu POST để thêm xe
-  Future<http.Response> _postCarData(Car car) async {
-    final Uri url = Uri.parse('http://localhost:3000/api/cars');
-
-    // Tạo đối tượng MultipartRequest để gửi dữ liệu, bao gồm ảnh nếu có
-    var carJson = car.toJson();
-
-    var response = await http.post(url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(carJson));
-
-    return response;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,7 +186,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Chọn ảnh xe
             GestureDetector(
               onTap: _showImageSourceDialog,
               child: Container(
@@ -233,8 +207,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Trường nhập tên xe
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -244,12 +216,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Dropdown chọn hãng xe
             _isLoading
-                ? Center(
-                    child:
-                        CircularProgressIndicator()) // Hiển thị loading khi đang tải
+                ? Center(child: CircularProgressIndicator())
                 : DropdownButtonFormField<int>(
                     decoration: InputDecoration(
                       labelText: 'Hãng xe',
@@ -258,18 +226,15 @@ class _AddCarScreenState extends State<AddCarScreen> {
                     ),
                     items: _carBrands.map((Brand brand) {
                       return DropdownMenuItem<int>(
-                        value: brand.brandId, // Lưu giá trị id của hãng xe
-                        child: Text(brand.name), // Hiển thị tên hãng xe
+                        value: brand.brandId,
+                        child: Text(brand.name),
                       );
                     }).toList(),
                     onChanged: (value) {
-                      // Lưu giá trị id hãng xe vào _brandController
                       _brandController.text = value.toString();
                     },
                   ),
             SizedBox(height: 16),
-
-            // Trường nhập năm sản xuất
             TextField(
               controller: _yearController,
               keyboardType: TextInputType.number,
@@ -280,8 +245,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Trường nhập giá xe
             TextField(
               controller: _priceController,
               keyboardType: TextInputType.number,
@@ -292,8 +255,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Trường mô tả
             TextField(
               controller: _descriptionController,
               maxLines: 3,
@@ -304,8 +265,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Trường nhập địa chỉ
             TextField(
               controller: _locationController,
               decoration: InputDecoration(
@@ -314,12 +273,10 @@ class _AddCarScreenState extends State<AddCarScreen> {
                 prefixIcon: Icon(Icons.location_on),
               ),
             ),
-            SizedBox(height: 16),
-
-            // Nút đăng bán
+            SizedBox(height: 32),
             ElevatedButton(
               onPressed: _submitCarInfo,
-              child: Text('Đăng Bán Xe'),
+              child: Text('Đăng bán xe'),
             ),
           ],
         ),
