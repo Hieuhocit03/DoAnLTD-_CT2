@@ -6,6 +6,8 @@ import 'seach_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/car.dart';
+import 'notifications_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -157,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen>
             // Mục Cá nhân
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => ProfileScreen()),
+              MaterialPageRoute(builder: (_) => NotificationsScreen()),
             );
           } else if (index == 4) {
             // Mục Cá nhân

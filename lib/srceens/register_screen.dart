@@ -53,52 +53,22 @@ class RegisterScreen extends StatelessWidget {
     final TextEditingController phoneController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Đăng Ký'),
-        backgroundColor: Colors.blue,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              const Text(
-                'Tạo tài khoản mới',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              // Trường nhập tên người dùng
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Tên người dùng',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Trường nhập email
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Trường nhập mật khẩu
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Mật khẩu',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+      body: Stack(
+        children: [
+          // Hình nền
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/image/bg-register.png'),
+                // Đường dẫn tới hình nền
+                fit: BoxFit.cover,
+                // Bao phủ toàn bộ vùng
+                colorFilter: ColorFilter.mode(
+                  Color.fromRGBO(255, 255, 255, 0.4),
+                  // Màu trắng với độ trong suốt 60%
+                  BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
                 ),
               ),
               const SizedBox(height: 16),
@@ -141,10 +111,115 @@ class RegisterScreen extends StatelessWidget {
                   Navigator.pop(context); // Quay lại trang trước
                 },
                 child: const Text('Đã có tài khoản? Đăng nhập'),
-              ),
-            ],
+            ),
           ),
-        ),
+          // Nội dung chính
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 100),
+                  // Hình đại diện
+                  Center(
+                    child: CircleAvatar(
+                      radius: 75,
+                      // Kích thước hình đại diện
+                      backgroundImage: AssetImage('assets/image/bg-dn.png'),
+                      // Hình đại diện
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Text(
+                    'Đăng Ký',
+                    style: TextStyle(fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  // Trường nhập tên người dùng
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Tên người dùng',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Trường nhập email
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Trường nhập mật khẩu
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Mật khẩu',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Trường nhập số điện thoại
+                  TextField(
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Số điện thoại',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.phone),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // Nút đăng ký
+                  ElevatedButton(
+                    onPressed: () {
+                      String name = nameController.text;
+                      String email = emailController.text;
+                      String password = passwordController.text;
+                      String phone = phoneController.text;
+                      // Xử lý logic đăng ký
+                      register(name, email, password, phone, context);
+                    },
+                    child: Text('Đăng Ký'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      textStyle: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Quay lại trang đăng nhập
+                    },
+                    child: Text('Đã có tài khoản? Đăng nhập',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
