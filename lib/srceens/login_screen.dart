@@ -1,15 +1,16 @@
+import 'package:do_an_app/models/user.dart';
 import 'package:flutter/material.dart';
 import '../srceens/register_screen.dart';
 import '../srceens/home_screen.dart';
 import '../srceens/forgotpass_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../models/user.dart';
 
 class LoginScreen extends StatelessWidget {
+  final String apiUrl = "http://localhost:3000/api/users/login";
 
-  final String apiUrl = "http://10.0.2.2:3000/api/users/login";
-
-  Future<void> login(String email, String password, BuildContext context) async {
+  Future<void> login(User user, BuildContext context) async {
     try {
       // Gửi request POST đến API
       final response = await http.post(
@@ -18,8 +19,8 @@ class LoginScreen extends StatelessWidget {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'email': email,
-          'password': password,
+          'email': user.email,
+          'password': user.password,
         }),
       );
 
@@ -46,7 +47,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
@@ -66,6 +66,67 @@ class LoginScreen extends StatelessWidget {
                   BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
                 ),
               ),
+              SizedBox(height: 30),
+              Text(
+                'Đăng Nhập',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              // Trường nhập email
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Trường nhập mật khẩu
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Mật khẩu',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Nút đăng nhập
+              ElevatedButton(
+                onPressed: () {
+                  // Xử lý đăng nhập ở đây
+                  User user = User(
+                    email: emailController.text,
+                    password: passwordController.text,
+                  );
+                  // Gọi hàm đăng nhập khi người dùng nhấn nút
+                  login(user, context);
+                },
+                child: Text('Đăng Nhập'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  textStyle: TextStyle(fontSize: 16),
+                ),
+              ),
+              SizedBox(height: 10),
+              // Liên kết đến trang quên mật khẩu
+              TextButton(
+                onPressed: () {
+                  // Điều hướng đến trang quên mật khẩu
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ForgotPasswordScreen()));
+                },
+                child: Text('Quên mật khẩu?'),
+              ),
+              SizedBox(height: 10),
+              // Liên kết đến trang đăng ký
+              Row(
             ),
           ),
           // Nội dung chính
@@ -166,6 +227,4 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
-
 

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'login_screen.dart';
+import '../models/user.dart';
 
 class RegisterScreen extends StatelessWidget {
 
-  final String apiUrl = "http://localhost:3000/api/users/register";
+  final String apiUrl = "http://10.0.2.2:3000/api/users/register";
 
-  Future<void> register(String name, String email, String password,
-      String phone, BuildContext context) async {
+  Future<void> register(User user, BuildContext context) async {
     try {
       // Gửi request POST đến API
       final response = await http.post(
@@ -16,12 +16,7 @@ class RegisterScreen extends StatelessWidget {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-          'phone': phone,
-        }),
+        body: jsonEncode(user.toJson()),
       );
 
       // Kiểm tra phản hồi từ API
@@ -76,6 +71,46 @@ class RegisterScreen extends StatelessWidget {
                   BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
                 ),
               ),
+              const SizedBox(height: 16),
+              // Trường nhập số điện thoại
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Nút đăng ký
+              ElevatedButton(
+                onPressed: () {
+                  User newUser = User(
+                    name: nameController.text,
+                    email: emailController.text,
+                    password: passwordController.text,
+                    phone: phoneController.text,
+                    role: 'user',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  );
+                  // Xử lý logic đăng ký (ví dụ: gọi API)
+                  register(newUser, context);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+                child: const Text('Đăng Ký'),
+              ),
+              const SizedBox(height: 10),
+              // Nút quay lại đăng nhập
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Quay lại trang trước
+                },
+                child: const Text('Đã có tài khoản? Đăng nhập'),
             ),
           ),
           // Nội dung chính

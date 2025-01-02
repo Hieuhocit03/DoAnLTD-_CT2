@@ -1,5 +1,6 @@
 import db from "../configs/db.js"; // Kết nối MySQL từ file db.js
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // Hàm đăng ký người dùng
 export const registerUser = async (req, res) => {
@@ -80,9 +81,19 @@ export const loginUser = (req, res) => {
       return res.status(401).json({ message: "Mật khẩu không chính xác" });
     }
 
+    const payload = {
+      id: user.user_id, // ID người dùng
+      email: user.email,
+      role: user.role, // Có thể thêm thông tin khác nếu cần
+    };
+
+    const secretKey = process.env.JWT_SECRET || "secret_key"; // Lấy từ biến môi trường hoặc dùng mặc định
+    const token = jwt.sign(payload, secretKey, { expiresIn: "1h" }); // Token có thời hạn 1 giờ
+
     // Đăng nhập thành công
     return res.status(200).json({
       message: "Đăng nhập thành công",
+      token,
       // user: {
       //   id: user.user_id,
       //   name: user.name,
