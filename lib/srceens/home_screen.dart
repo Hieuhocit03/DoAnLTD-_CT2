@@ -2,7 +2,7 @@ import 'package:do_an_app/srceens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'car_detail_screen.dart';
 import 'add_car_screen.dart';
-import 'seach_screen.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -40,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       'name': 'Toyota Camry',
       'time': '20:30 | 25 tháng 12, 2024',
       'price': '700 triệu',
+
       'brand': 'Toyota',
       'year': 2018,
       'description': 'Xe gia đình, bảo dưỡng định kỳ, nội thất đẹp.',
@@ -82,28 +83,29 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFEf8f9fd),
       appBar: currentIndex == 0
           ? AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFf8f9fd),
         title: Text(
           'Trang chủ',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.blue,
+          labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.blue,
+          indicatorColor: Colors.lightBlueAccent,
           tabs: [
             Tab(text: 'Danh sách xe'),
-            Tab(text: 'Xe yêu thích'),
+            Tab(text: 'Xe chờ mua'),
           ],
         ),
       )
           : AppBar(
         title: Text('AutoCar'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueGrey,
       ),
       body: IndexedStack(
         index: currentIndex,
@@ -112,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           TabBarView(
             controller: _tabController,
             children: [
+
+
               _buildCarList(),
               Center(
                 child: Text(
@@ -149,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+
         currentIndex: currentIndex,
         onTap: (index) {
           if (index == 1) { // Khi nhấn nút Thêm
@@ -161,11 +166,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               context,
               MaterialPageRoute(builder: (_) => AddCarScreen()),
             );
-          } else if (index == 3) { // Mục Cá nhân
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ProfileScreen()),
-            );
+          // } else if (index == 3) { // Mục Cá nhân
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(builder: (_) => ProfileScreen()),
+          //   );
           } else if (index == 4) { // Mục Cá nhân
             Navigator.push(
               context,
@@ -184,7 +189,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Thông báo'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
         ],
-        selectedItemColor: Colors.blue,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.lightBlueAccent,
         unselectedItemColor: Colors.grey,
       ),
     );
@@ -196,38 +202,62 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16.0),
-            itemCount: cars.length, // Hiển thị tất cả các xe
+            itemCount: cars.length,
             itemBuilder: (context, index) {
-              final car = cars[index]; // Dùng trực tiếp danh sách cars
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
+              final car = cars[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CarDetailScreen(car: car),
                     ),
-                  ],
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12.0),
-                  leading: _buildCarImage(car['coverImage']),
-                  title: Text(
-                    car['name'],
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  subtitle: Text('Giá: ${car['price']} - Năm: ${car['year']}'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CarDetailScreen(car: car),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
                       ),
-                    );
-                  },
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Hình ảnh lớn ở giữa
+                      _buildLargeCarImage(car['coverImage']),
+
+                      // Thông tin xe
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: ListTile(
+                          title: Text(
+                            car['name'],
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          subtitle: Text('${car['brand']} - ${car['year']}'),
+                          trailing: Text(
+                            car['price'],
+                            style:TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.lightBlueAccent),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CarDetailScreen(car: car),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -237,22 +267,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildCarImage(String imageUrl) {
+  Widget _buildLargeCarImage(String imageUrl) {
     return Container(
-      width: 80,
-      height: 80,
+      width: double.infinity,
+      height: 250, // Tăng chiều cao của hình ảnh
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
-            blurRadius: 5,
-            offset: Offset(0, 3),
+            blurRadius: 10,
+            offset: Offset(0, 5),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
         child: Image.network(
           imageUrl,
           fit: BoxFit.cover,
@@ -270,10 +304,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           errorBuilder: (context, error, stackTrace) {
             return Container(
               color: Colors.grey[300],
-              child: Icon(
-                Icons.directions_car,
-                color: Colors.grey[600],
-                size: 40,
+              child: Center(
+                child: Icon(
+                  Icons.directions_car,
+                  color: Colors.grey[600],
+                  size: 100,
+                ),
               ),
             );
           },

@@ -10,18 +10,14 @@ class CarDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.blueGrey.withOpacity(0.9),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context); // Quay lại màn hình trước đó
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {},
-          )
-        ],
+      title: Text('Chi Tiết Xe',style:TextStyle(color: Colors.white)),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -39,18 +35,19 @@ class CarDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCarImageSection() {
-    return Container(
-      height: 250,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage('${car['coverImage']}'),
-          fit: BoxFit.cover,
-        ),
+Widget _buildCarImageSection() {
+  return Container(
+    //margin: EdgeInsets.only(top: 70), // Add margin to create space above
+    height: 250,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      image: DecorationImage(
+        image: NetworkImage('${car['coverImage']}'),
+        fit: BoxFit.cover,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCarDetailsSection() {
     return Padding(
@@ -71,7 +68,7 @@ class CarDetailScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.blueGrey,
+              color: Colors.lightBlueAccent,
             ),
           ),
           SizedBox(height: 8),
@@ -253,10 +250,12 @@ class CarDetailScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             'Seller Information',
             style: TextStyle(
-              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
 
           ),
+
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -278,13 +277,13 @@ class CarDetailScreen extends StatelessWidget {
                 text: car['phone'],
                 onTap: () => _launchPhone(car['phone']),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 10),
               _buildContactRow(
                 icon: Icons.email,
                 text: car['email'].length > 25 ? car['email'].substring(0, 25) + '...' : car['email'],
                 onTap: () => _launchEmail(car['email']),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 10),
               _buildContactRow(
                 icon: Icons.location_on,
                 text: car['location'].length > 25 ? car['location'].substring(0, 25) + '...' : car['location'],
@@ -304,6 +303,18 @@ class CarDetailScreen extends StatelessWidget {
               ),
 
             ),
+            ElevatedButton(
+              onPressed: () {
+                // Xử lý logic mua xe ở đây
+                Navigator.pop(context, );
+                // Ví dụ: chuyển đến trang thanh toán hoặc thực hiện giao dịch
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey, // Màu nền nút
+                foregroundColor: Colors.white, // Màu chữ
+              ),
+              child: Text('MUA'),
+            ),
           ],
         );
       },
@@ -320,12 +331,12 @@ class CarDetailScreen extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue),
-          SizedBox(width: 8),
+          Icon(icon, color: Colors.blueGrey),
+          SizedBox(width: 20),
           Text(
             text,
             style: TextStyle(
-              color: Colors.blue,
+              color: Colors.blueGrey,
               decoration: TextDecoration.underline,
             ),
           ),
