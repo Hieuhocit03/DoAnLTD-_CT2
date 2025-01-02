@@ -12,9 +12,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   // Thông tin người dùng mẫu
   final Map<String, dynamic> userProfile = {
     'avatar': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp',
-    'name': 'Nguyễn Văn A',
-    'email': 'nguyenvana@gmail.com',
-    'phone': '0334551345'
+    'name': 'Hieu Nguyen',
+    'email': 'nguyenhiu@gmail.com',
+    'phone': '0334000345',
+    'location': 'Hanoi, Vietnam',
   };
 
   // Danh sách xe đang bán
@@ -162,6 +163,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
                 Text(
                   userProfile['phone'],
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  userProfile['location'],
                   style: TextStyle(color: Colors.grey),
                 ),
               ],

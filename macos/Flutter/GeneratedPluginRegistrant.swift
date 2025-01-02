@@ -4,7 +4,6 @@
 
 import FlutterMacOS
 import Foundation
-
 import file_selector_macos
 import url_launcher_macos
 

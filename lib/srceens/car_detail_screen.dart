@@ -17,6 +17,12 @@ class CarDetailScreen extends StatelessWidget {
             Navigator.pop(context); // Quay lại màn hình trước đó
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_vert),
+            onPressed: () {},
+          )
+        ],
       title: Text('Chi Tiết Xe',style:TextStyle(color: Colors.white)),
       ),
       body: SingleChildScrollView(
