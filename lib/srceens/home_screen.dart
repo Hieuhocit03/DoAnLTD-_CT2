@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'car_detail_screen.dart';
 import 'add_car_screen.dart';
 import 'seach_screen.dart';
+import 'notifications_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -164,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           } else if (index == 3) { // Mục Cá nhân
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => ProfileScreen()),
+              MaterialPageRoute(builder: (_) => NotificationsScreen()),
             );
           } else if (index == 4) { // Mục Cá nhân
             Navigator.push(
