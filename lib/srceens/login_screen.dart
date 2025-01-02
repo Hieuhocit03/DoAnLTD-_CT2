@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../srceens/register_screen.dart';
 import '../srceens/home_screen.dart';
+import '../srceens/forgotpass_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -132,7 +133,10 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
-                      // Điều hướng đến trang quên mật khẩu
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                        );
                     },
                     child: Text('Quên mật khẩu?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
@@ -143,7 +147,10 @@ class LoginScreen extends StatelessWidget {
                       Text('Chưa có tài khoản?', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () {
-                          // Điều hướng đến trang đăng ký
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => RegisterScreen()),
+                          );
                         },
                         child: Text('Đăng ký ngay',style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
 
@@ -162,14 +169,3 @@ class LoginScreen extends StatelessWidget {
 
 
 
-class ForgotPasswordScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Quên Mật Khẩu')),
-      body: Center(
-        child: Text('Trang quên mật khẩu'),
-      ),
-    );
-  }
-}
