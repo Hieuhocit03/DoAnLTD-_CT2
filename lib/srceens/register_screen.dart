@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'login_screen.dart';
+import '../models/user.dart';
 
 class RegisterScreen extends StatelessWidget {
 
-  final String apiUrl = "http://localhost:3000/api/users/register";
+  final String apiUrl = "http://10.0.2.2:3000/api/users/register";
 
-  Future<void> register(String name, String email, String password, String phone, BuildContext context) async {
+  Future<void> register(User user, BuildContext context) async {
     try {
       // Gửi request POST đến API
       final response = await http.post(
@@ -15,12 +16,7 @@ class RegisterScreen extends StatelessWidget {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-          'phone': phone,
-        }),
+        body: jsonEncode(user.toJson()),
       );
 
       // Kiểm tra phản hồi từ API
@@ -120,12 +116,17 @@ class RegisterScreen extends StatelessWidget {
               // Nút đăng ký
               ElevatedButton(
                 onPressed: () {
-                  String name = nameController.text;
-                  String email = emailController.text;
-                  String password = passwordController.text;
-                  String phone = phoneController.text;
+                  User newUser = User(
+                    name: nameController.text,
+                    email: emailController.text,
+                    password: passwordController.text,
+                    phone: phoneController.text,
+                    role: 'user',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  );
                   // Xử lý logic đăng ký (ví dụ: gọi API)
-                  register(name, email, password, phone, context);
+                  register(newUser, context);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

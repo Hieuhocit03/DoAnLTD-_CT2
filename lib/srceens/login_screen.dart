@@ -1,14 +1,15 @@
+import 'package:do_an_app/models/user.dart';
 import 'package:flutter/material.dart';
 import '../srceens/register_screen.dart';
 import '../srceens/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../models/user.dart';
 
 class LoginScreen extends StatelessWidget {
+  final String apiUrl = "http://localhost:3000/api/users/login";
 
-  final String apiUrl = "http://10.0.2.2:3000/api/users/login";
-
-  Future<void> login(String email, String password, BuildContext context) async {
+  Future<void> login(User user, BuildContext context) async {
     try {
       // Gửi request POST đến API
       final response = await http.post(
@@ -17,8 +18,8 @@ class LoginScreen extends StatelessWidget {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'email': email,
-          'password': password,
+          'email': user.email,
+          'password': user.password,
         }),
       );
 
@@ -45,7 +46,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
@@ -100,10 +100,12 @@ class LoginScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Xử lý đăng nhập ở đây
-                  String email = emailController.text;
-                  String password = passwordController.text;
+                  User user = User(
+                    email: emailController.text,
+                    password: passwordController.text,
+                  );
                   // Gọi hàm đăng nhập khi người dùng nhấn nút
-                  login(email, password, context);
+                  login(user, context);
                 },
                 child: Text('Đăng Nhập'),
                 style: ElevatedButton.styleFrom(
@@ -116,7 +118,10 @@ class LoginScreen extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   // Điều hướng đến trang quên mật khẩu
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ForgotPasswordScreen()));
                 },
                 child: Text('Quên mật khẩu?'),
               ),
@@ -129,7 +134,8 @@ class LoginScreen extends StatelessWidget {
                   TextButton(
                     onPressed: () {
                       // Điều hướng đến trang đăng ký
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => RegisterScreen()));
                     },
                     child: Text('Đăng ký ngay'),
                   ),
@@ -142,8 +148,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 class ForgotPasswordScreen extends StatelessWidget {
   @override

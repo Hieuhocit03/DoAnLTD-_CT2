@@ -198,14 +198,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   title: Text(car['name']),
                   subtitle: Text('${car['brand']} - ${car['year']}'),
                   trailing: Text(car['price']),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CarDetailScreen(car: car),
-                      ),
-                    );
-                  },
+                  // onTap: () {
+                  //   Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (context) => CarDetailScreen(car: car),
+                  //     ),
+                  //   );
+                  // },
                 );
               },
             ),
