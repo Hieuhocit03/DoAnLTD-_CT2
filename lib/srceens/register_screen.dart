@@ -5,7 +5,6 @@ import 'login_screen.dart';
 import '../models/user.dart';
 
 class RegisterScreen extends StatelessWidget {
-
   final String apiUrl = "http://10.0.2.2:3000/api/users/register";
 
   Future<void> register(User user, BuildContext context) async {
@@ -29,7 +28,7 @@ class RegisterScreen extends StatelessWidget {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginScreen()),
-        ); // Quay lại màn hình trước (login)
+        ); // Quay lại màn hình login
       } else {
         print('Đăng ký thất bại: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -62,55 +61,12 @@ class RegisterScreen extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/image/bg-register.png'),
-                // Đường dẫn tới hình nền
                 fit: BoxFit.cover,
-                // Bao phủ toàn bộ vùng
                 colorFilter: ColorFilter.mode(
                   Color.fromRGBO(255, 255, 255, 0.4),
-                  // Màu trắng với độ trong suốt 60%
-                  BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
+                  BlendMode.srcOver,
                 ),
               ),
-              const SizedBox(height: 16),
-              // Trường nhập số điện thoại
-              TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Số điện thoại',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Nút đăng ký
-              ElevatedButton(
-                onPressed: () {
-                  User newUser = User(
-                    name: nameController.text,
-                    email: emailController.text,
-                    password: passwordController.text,
-                    phone: phoneController.text,
-                    role: 'user',
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  );
-                  // Xử lý logic đăng ký (ví dụ: gọi API)
-                  register(newUser, context);
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16),
-                ),
-                child: const Text('Đăng Ký'),
-              ),
-              const SizedBox(height: 10),
-              // Nút quay lại đăng nhập
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Quay lại trang trước
-                },
-                child: const Text('Đã có tài khoản? Đăng nhập'),
             ),
           ),
           // Nội dung chính
@@ -125,16 +81,15 @@ class RegisterScreen extends StatelessWidget {
                   Center(
                     child: CircleAvatar(
                       radius: 75,
-                      // Kích thước hình đại diện
                       backgroundImage: AssetImage('assets/image/bg-dn.png'),
-                      // Hình đại diện
                       backgroundColor: Colors.transparent,
                     ),
                   ),
                   SizedBox(height: 30),
                   Text(
                     'Đăng Ký',
-                    style: TextStyle(fontSize: 24,
+                    style: TextStyle(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black),
                     textAlign: TextAlign.center,
@@ -198,8 +153,30 @@ class RegisterScreen extends StatelessWidget {
                       String email = emailController.text;
                       String password = passwordController.text;
                       String phone = phoneController.text;
+
+                      // Kiểm tra nếu thông tin trống thì không đăng ký
+                      if (name.isEmpty ||
+                          email.isEmpty ||
+                          password.isEmpty ||
+                          phone.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Vui lòng điền đầy đủ thông tin')),
+                        );
+                        return;
+                      }
+
                       // Xử lý logic đăng ký
-                      register(name, email, password, phone, context);
+                      User newUser = User(
+                        name: name,
+                        email: email,
+                        password: password,
+                        phone: phone,
+                        role: 'user',
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      );
+                      register(newUser, context);
                     },
                     child: Text('Đăng Ký'),
                     style: ElevatedButton.styleFrom(

@@ -1,11 +1,10 @@
-import 'package:do_an_app/models/user.dart';
 import 'package:flutter/material.dart';
-import '../srceens/register_screen.dart';
-import '../srceens/home_screen.dart';
-import '../srceens/forgotpass_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/user.dart';
+import 'register_screen.dart';
+import 'home_screen.dart';
+import 'forgotpass_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   final String apiUrl = "http://localhost:3000/api/users/login";
@@ -26,22 +25,25 @@ class LoginScreen extends StatelessWidget {
 
       // Kiểm tra phản hồi từ API
       if (response.statusCode == 200) {
-        // Nếu đăng nhập thành công, bạn có thể xử lý dữ liệu ở đây
         var data = jsonDecode(response.body);
         print('Đăng nhập thành công: $data');
-        // Chuyển hướng đến màn hình chính hoặc nơi bạn muốn sau khi đăng nhập thành công
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
-        // Nếu đăng nhập thất bại
         print('Đăng nhập thất bại: ${response.body}');
-        // Hiển thị thông báo lỗi cho người dùng
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin')),
+        );
       }
     } catch (e) {
       print('Lỗi kết nối: $e');
-      // Hiển thị thông báo lỗi nếu gặp vấn đề khi gọi API
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi kết nối, vui lòng thử lại sau')),
+      );
     }
   }
 
@@ -59,74 +61,13 @@ class LoginScreen extends StatelessWidget {
             height: double.infinity,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/image/bg-login.png'), // Đường dẫn tới hình nền
-                fit: BoxFit.cover, // Bao phủ toàn bộ vùng
+                image: AssetImage('assets/image/bg-login.png'),
+                fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Color.fromRGBO(255, 255, 255, 0.4), // Màu trắng với độ trong suốt 60%
-                  BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
+                  Color.fromRGBO(255, 255, 255, 0.4),
+                  BlendMode.srcOver,
                 ),
               ),
-              SizedBox(height: 30),
-              Text(
-                'Đăng Nhập',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              // Trường nhập email
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              SizedBox(height: 16),
-              // Trường nhập mật khẩu
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Mật khẩu',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Nút đăng nhập
-              ElevatedButton(
-                onPressed: () {
-                  // Xử lý đăng nhập ở đây
-                  User user = User(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  // Gọi hàm đăng nhập khi người dùng nhấn nút
-                  login(user, context);
-                },
-                child: Text('Đăng Nhập'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
-              ),
-              SizedBox(height: 10),
-              // Liên kết đến trang quên mật khẩu
-              TextButton(
-                onPressed: () {
-                  // Điều hướng đến trang quên mật khẩu
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => ForgotPasswordScreen()));
-                },
-                child: Text('Quên mật khẩu?'),
-              ),
-              SizedBox(height: 10),
-              // Liên kết đến trang đăng ký
-              Row(
             ),
           ),
           // Nội dung chính
@@ -141,15 +82,18 @@ class LoginScreen extends StatelessWidget {
                   // Hình đại diện
                   Center(
                     child: CircleAvatar(
-                      radius: 75, // Kích thước hình đại diện
+                      radius: 75,
                       backgroundImage: AssetImage('assets/image/bg-dn.png'),
-                      backgroundColor: Colors.transparent, // Đảm bảo không có nền đè
+                      backgroundColor: Colors.transparent,
                     ),
                   ),
                   SizedBox(height: 30),
                   Text(
                     'Đăng Nhập',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 20),
@@ -162,7 +106,7 @@ class LoginScreen extends StatelessWidget {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email),
                       filled: true,
-
+                      fillColor: Colors.white.withOpacity(0.9),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -175,6 +119,7 @@ class LoginScreen extends StatelessWidget {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
                       filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -183,9 +128,15 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       String email = emailController.text;
                       String password = passwordController.text;
+                      User user = User(
+                        email: email,
+                        password: password,
+                      );
                       // Gọi hàm xử lý đăng nhập
+                      login(user, context);
                     },
-                    child: Text('Đăng Nhập',style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text('Đăng Nhập',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       textStyle: TextStyle(fontSize: 16),
@@ -194,27 +145,37 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
-                        Navigator.push(
+                      Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
-                        );
+                        MaterialPageRoute(
+                            builder: (context) => ForgotPasswordScreen()),
+                      );
                     },
-                    child: Text('Quên mật khẩu?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: Text('Quên mật khẩu?',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                   SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Chưa có tài khoản?', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
+                      Text('Chưa có tài khoản?',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => RegisterScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => RegisterScreen()),
                           );
                         },
-                        child: Text('Đăng ký ngay',style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-
+                        child: Text(
+                          'Đăng ký ngay',
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
@@ -227,4 +188,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
