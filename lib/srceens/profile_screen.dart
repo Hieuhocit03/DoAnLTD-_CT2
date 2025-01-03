@@ -1,4 +1,5 @@
 import 'package:do_an_app/srceens/login_screen.dart';
+import 'package:do_an_app/srceens/main_profile.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -184,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
+                      builder: (context) => MainScreen(),
                     ),
                   );
                 }),

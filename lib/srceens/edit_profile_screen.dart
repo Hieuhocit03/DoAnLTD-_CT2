@@ -58,6 +58,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Hàm gửi yêu cầu PUT tới API để cập nhật thông tin người dùng
   Future<void> _updateUser() async {
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _phoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content:
+            Text('Please fill in all required fields: Name, Email, and Phone'),
+        backgroundColor: Colors.red,
+      ));
+      return; // Dừng lại nếu bất kỳ trường nào bị bỏ trống
+    }
     setState(() {
       _isLoading = true;
     });

@@ -172,8 +172,7 @@ export const getUserById = (req, res) => {
   }
 
   // Truy vấn cơ sở dữ liệu để lấy thông tin người dùng
-  const query =
-    "SELECT user_id, role, name, email, phone, status, created_at, updated_at FROM users WHERE user_id = ?";
+  const query = "SELECT * FROM users WHERE user_id = ?";
 
   db.query(query, [userId], (err, results) => {
     if (err) {

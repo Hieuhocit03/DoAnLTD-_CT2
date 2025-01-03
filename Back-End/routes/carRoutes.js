@@ -6,6 +6,7 @@ import {
   deleteCar,
   updateCar,
   updateCarStatus,
+  getCarsBySeller,
 } from "../controllers/carControllers.js";
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.delete("/:id", deleteCar);
 // Sửa thông tin xe
 router.put("/:id", updateCar);
 router.put("/cars/status", updateCarStatus);
+router.get("/cars/seller/:sellerId", getCarsBySeller);
 
 export default router;
