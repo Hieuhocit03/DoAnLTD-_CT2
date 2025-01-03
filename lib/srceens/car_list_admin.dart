@@ -54,22 +54,25 @@ class _CarListPageState extends State<CarListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Danh Sách Xe'),
+        title: Text('Danh Sách Xe', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.green,
       ),
       body: FutureBuilder<List<Car>>(
         future: _cars,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(color: Colors.green));
           } else if (snapshot.hasError) {
             return Center(
                 child: Text('Lỗi khi tải dữ liệu: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Không có xe nào.'));
+            return Center(child: Text('Không có xe nào.', style: TextStyle(fontSize: 18, color: Colors.grey)));
           } else {
             final cars = snapshot.data!;
 
             return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               itemCount: cars.length,
               itemBuilder: (context, index) {
                 final car = cars[index];
@@ -101,27 +104,14 @@ class _CarListPageState extends State<CarListPage> {
 
   Widget _buildCarItem(Car car, String subtitle) {
     return Card(
-      elevation: 5, // Thêm bóng cho khung
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      elevation: 5,
+      margin: EdgeInsets.only(bottom: 15),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Bo tròn các góc
+        borderRadius: BorderRadius.circular(15),
       ),
-      child: ListTile(
-        leading: car.imageUrl != null && car.imageUrl!.isNotEmpty
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(car.imageUrl!), // Sử dụng đường dẫn ảnh từ cơ sở dữ liệu
-                  fit: BoxFit.cover,
-                  width: 50,
-                  height: 50,
-                ),
-              )
-            : Icon(Icons.directions_car, size: 50),
-        title: Text(car.name, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(15),
         onTap: () {
-          // Chuyển đến trang chi tiết và truyền car_id qua route
           if (car.carId != null) {
             Navigator.push(
               context,
@@ -130,18 +120,65 @@ class _CarListPageState extends State<CarListPage> {
               ),
             );
           } else {
-            // Xử lý trường hợp car.id là null nếu cần
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Car ID is null')),
             );
           }
         },
-        trailing: IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () async {
-            await _updateCarStatus(
-                car); // Gọi phương thức để cập nhật trạng thái
-          },
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: car.imageUrl != null && car.imageUrl!.isNotEmpty
+                  ? Image.file(
+                File(car.imageUrl!),
+                fit: BoxFit.cover,
+                width: 120,
+                height: 120,
+              )
+                  : Container(
+                color: Colors.grey[200],
+                width: 120,
+                height: 120,
+                child: Icon(
+                  Icons.directions_car,
+                  size: 50,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      car.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                car.status == 'Đang bán' ? Icons.sell : Icons.done,
+                color: car.status == 'Đang bán' ? Colors.orange : Colors.green,
+              ),
+              onPressed: () async {
+                await _updateCarStatus(car);
+              },
+            ),
+          ],
         ),
       ),
     );

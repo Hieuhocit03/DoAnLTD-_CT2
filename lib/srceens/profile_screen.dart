@@ -1,3 +1,6 @@
+
+import 'package:do_an_app/srceens/login_screen.dart';
+import 'package:do_an_app/srceens/main_profile.dart';
 import 'package:flutter/material.dart';
 //import 'home_screen.dart';
 import 'car_detail_screen.dart';
@@ -376,8 +379,100 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     ),
                   ],
                 ),
-              );
-            },
+              ),
+            ],
+          ),
+          SizedBox(height: 30),
+          // Tên và email người dùng
+          Text(
+            _user?.email ?? 'Tên Tài khoản',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 5),
+          Text(
+            _user?.phone ?? 'email@example.com',
+            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+          ),
+          SizedBox(height: 20),
+          // Danh sách các mục
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _buildProfileOption(Icons.person, 'Hồ sơ cá nhân', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MainScreen(),
+                    ),
+                  );
+                }),
+                Divider(color: Colors.grey[300]),
+                _buildProfileOption(Icons.notifications, 'Thông báo', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  );
+                }),
+                Divider(color: Colors.grey[300]),
+                _buildProfileOption(Icons.help, 'Trợ giúp', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  );
+                }),
+                Divider(color: Colors.grey[300]),
+                _buildProfileOption(Icons.info, 'Giới thiệu', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  );
+                }),
+                Divider(color: Colors.grey[300]),
+                _buildProfileOption(Icons.swap_horiz, 'Chuyển tài khoản', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          // Nút Đăng Xuất
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+              child: Text(
+                'Đăng Xuất',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold, // In đậm
+                  color: Colors.white, // Màu trắng
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(0, 0, 0, 0.7), // Màu đỏ đậm
+                padding: EdgeInsets.symmetric(vertical: 16),
+                textStyle: TextStyle(fontSize: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                minimumSize: Size(200, 50),
+              ),
+            ),
           ),
         ),
       ],

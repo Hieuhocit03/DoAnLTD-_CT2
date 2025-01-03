@@ -89,7 +89,10 @@ class _AddCarScreenState extends State<AddCarScreen> {
   Future<void> _pickImage(ImageSource source) async {
     try {
       // Chọn ảnh
-      final pickedFile = await ImagePicker().pickImage(source: source);
+      final pickedFile = await ImagePicker().pickImage(source: source,
+        maxWidth: 800, // Tùy chọn: resize ảnh nếu cần
+        maxHeight: 800,
+        imageQuality: 80,);
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
 
@@ -180,17 +183,16 @@ class _AddCarScreenState extends State<AddCarScreen> {
                 onTap: () async {
                   Navigator.of(context).pop(); // Đóng bottom sheet
                   // Lấy tất cả các ảnh từ thư mục đã lưu
-                  List<File> images = await _getImagesFromStorage();
-                  // Hiển thị các ảnh đã lấy được
-                  _showImagePicker(images);
+                  _pickImage(ImageSource.gallery);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt),
                 title: Text('Chụp ảnh'),
                 onTap: () {
-                  _pickImage(ImageSource.camera);
+
                   Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
                 },
               ),
             ],

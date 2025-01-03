@@ -257,4 +257,86 @@ class ApiService {
       throw Exception('Failed to load users');
     }
   }
+
+  static Future<List<Car>> getCarsBySellerId(String sellerId) async {
+    final response =
+        await http.get(Uri.parse('${baseUrl}cars/cars/seller/$sellerId'));
+
+    if (response.statusCode == 200) {
+      // Nếu thành công, parse dữ liệu
+      List<dynamic> data = json.decode(response.body);
+      print("$data");
+      return data.map((carJson) => Car.fromJson(carJson)).toList();
+    } else {
+      throw Exception('Failed to load cars');
+    }
+  }
+
+  static Future<bool> deleteCar(int carId) async {
+    print("$carId");
+    final response = await http.delete(
+      Uri.parse('http://10.0.122.239:3000/api/cars/$carId'),
+    );
+    return response.statusCode == 200;
+  }
+
+  static Future<List<Car>> getCar(int carId) async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://10.0.122.239:3000/api/cars/$carId'));
+
+      // Kiểm tra mã trạng thái của response
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load car details');
+      }
+
+      // Parse JSON response thành List<dynamic>
+      final List<dynamic> data = json.decode(response.body);
+
+      // Chuyển đổi từng phần tử JSON thành đối tượng Car
+      return data.map((json) => Car.fromJson(json)).toList();
+    } catch (e) {
+      print('Error fetching car details: $e');
+      throw Exception('Failed to load car details');
+    }
+  }
+
+  static Future<CarCondition> getCarCondition(int carId) async {
+    final response = await http
+        .get(Uri.parse('http://10.0.122.239:3000/api/car-conditions/$carId'));
+    return CarCondition.fromJson(jsonDecode(response.body));
+  }
+
+  static Future<CarSpecification> getCarSpecification(int carId) async {
+    final response = await http.get(
+        Uri.parse('http://10.0.122.239:3000/api/car-specifications/$carId'));
+    return CarSpecification.fromJson(jsonDecode(response.body));
+  }
+
+  static Future<void> updateCar(Car car) async {
+    await http.put(
+      Uri.parse('http://10.0.122.239:3000/api/cars/${car.carId}'),
+      body: jsonEncode(car.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  }
+
+  static Future<void> updateCarCondition(CarCondition carCondition) async {
+    await http.put(
+      Uri.parse(
+          'http://10.0.122.239:3000/api/car-conditions/${carCondition.conditionId}'),
+      body: jsonEncode(carCondition.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  }
+
+  static Future<void> updateCarSpecification(
+      CarSpecification carSpecification) async {
+    await http.put(
+      Uri.parse(
+          'http://10.0.122.239:3000/api/car-specifications/${carSpecification.specificationId}'),
+      body: jsonEncode(carSpecification.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  }
 }

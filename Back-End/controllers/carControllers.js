@@ -20,6 +20,7 @@ export const getCars = (req, res) => {
 // Lấy thông tin chi tiết của một xe
 export const getCarById = (req, res) => {
   const { id } = req.params;
+  console.log("id", id);
   const query = "SELECT * FROM cars WHERE car_id = ?";
   db.query(query, [id], (err, results) => {
     if (err) {
@@ -183,5 +184,30 @@ export const updateCarStatus = (req, res) => {
     }
 
     return res.status(200).json({ message: "Cập nhật trạng thái thành công." });
+  });
+};
+
+export const getCarsBySeller = (req, res) => {
+  const { sellerId } = req.params; // Lấy sellerId từ tham số của request
+  console.log("sellerId", sellerId);
+
+  // Xây dựng câu lệnh SQL để lấy danh sách xe của seller
+  const query = `
+    SELECT *
+    FROM cars
+    WHERE seller_id = ?
+    ORDER BY created_at DESC;
+  `;
+
+  db.query(query, [sellerId], (error, results) => {
+    if (error) {
+      console.error("Error fetching cars:", error);
+      return res.status(500).json({ message: "Failed to retrieve cars" });
+    }
+    if (results.length > 0) {
+      return res.status(200).json(results); // Trả về danh sách xe
+    } else {
+      return res.status(404).json({ message: "No cars found for this seller" });
+    }
   });
 };
