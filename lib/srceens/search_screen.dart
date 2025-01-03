@@ -10,6 +10,7 @@ class SearchScreen extends StatefulWidget {
   _SearchScreenState createState() => _SearchScreenState();
 }
 class _SearchScreenState extends State<SearchScreen> {
+
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -87,12 +88,14 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFEf8f9fd),
       appBar: AppBar(
-        title: Text('Tìm Kiếm Xe'),
-        backgroundColor: Colors.blue,
+        title: Text('Tìm Kiếm Xe', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [
+
           // Thanh tìm kiếm
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -113,7 +116,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
               // Xử lý khi nhấn enter
@@ -122,7 +125,19 @@ class _SearchScreenState extends State<SearchScreen> {
               },
             ),
           ),
-
+          SizedBox(width: 10), // Khoảng cách giữa thanh tìm kiếm và nút
+          ElevatedButton(
+            onPressed: _performSearch,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE7393B3), // Màu nền nút
+              foregroundColor: Colors.white, // Màu chữ
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20), // Bo góc giống thanh tìm kiếm
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+            ),
+            child: Text('Tìm'),
+          ),
           // Lịch sử tìm kiếm (chỉ hiện khi có lịch sử)
           if (_searchHistory.isNotEmpty)
             Padding(
@@ -195,17 +210,20 @@ class _SearchScreenState extends State<SearchScreen> {
                       return Icon(Icons.directions_car, size: 80);
                     },
                   ),
-                  title: Text(car['name']),
+                  title: Text(car['name'],style:TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   subtitle: Text('${car['brand']} - ${car['year']}'),
-                  trailing: Text(car['price']),
-                  // onTap: () {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //       builder: (context) => CarDetailScreen(car: car),
-                  //     ),
-                  //   );
-                  // },
+                  trailing: Text(
+                    car['price'],
+                    style:TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CarDetailScreen(car: car),
+                      ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,332 +1,402 @@
-// lib/screens/car_detail_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../models/car.dart';
-import '../models/car_specifications.dart';
-import '../models/car_condition.dart';
-import '../models/brand.dart';
-import '../models/car_models.dart';
-import '../services/api_service.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'home_screen.dart';
 class CarDetailScreen extends StatelessWidget {
-  final int carId;
-  CarDetailScreen({required this.carId});
-
-  final ApiService _apiService = ApiService(); // Tạo instance ApiService
-
   @override
+  final Map<String, dynamic> car;
+  CarDetailScreen({required this.car});
+
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context); // Quay lại màn hình trước đó
-            },
-          ),
-          title: Text('Car Details'),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.blueGrey.withOpacity(0.9),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Quay lại màn hình trước đó
+          },
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Hiển thị thông tin carDetails
-              FutureBuilder<List<Brand>>(
-                future: _apiService.fetchBrands(),
-                builder: (context, brandSnapshot) {
-                  if (brandSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (brandSnapshot.hasError) {
-                    return Center(child: Text('Error: ${brandSnapshot.error}'));
-                  }
-                  if (!brandSnapshot.hasData || brandSnapshot.data!.isEmpty) {
-                    return Center(child: Text('No brands available'));
-                  }
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_vert),
+            onPressed: () {},
+          )
+        ],
+      title: Text('Chi Tiết Xe',style:TextStyle(color: Colors.white)),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCarImageSection(),
+            _buildCarDetailsSection(),
 
-                  final brands = brandSnapshot.data!;
-
-                  return FutureBuilder<List<Car>>(
-                    future: _apiService.fetchCarDetails(carId),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No car details available'));
-                      }
-
-                      final carDetails = snapshot.data!;
-                      return _buildSection(
-                        title: "Car Details",
-                        children: carDetails.map((car) {
-                          // Tìm kiếm thương hiệu (brand) dựa trên brandId trong car
-                          final brand = brands.firstWhere(
-                            (brand) => brand.brandId == car.brandId,
-                            orElse: () => Brand(brandId: -1, name: 'Unknown'),
-                          );
-                          // Truyền cả Car và Brand vào _buildCarDetailsItem
-                          return _buildCarDetailsItem(car, brand);
-                        }).toList(),
-                      );
-                    },
-                  );
-                },
-              ),
-              // Hiển thị thông tin carCondition
-              FutureBuilder<List<CarCondition>>(
-                future: _apiService.fetchCarCondition(carId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No car condition available'));
-                  }
-
-                  final carCondition = snapshot.data!;
-                  return _buildSection(
-                    title: "Car Condition",
-                    children: carCondition
-                        .map((condition) => _buildCarConditionItem(condition))
-                        .toList(),
-                  );
-                },
-              ),
-              // Hiển thị thông tin carSpecifications
-              FutureBuilder<List<CarSpecification>>(
-                future: _apiService.fetchCarSpecifications(carId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(
-                        child: Text('No car specifications available'));
-                  }
-
-                  final specifications = snapshot.data!;
-
-                  return FutureBuilder<List<CarModel>>(
-                    future: _apiService
-                        .fetchCarModelNames(), // Fetch danh sách car models
-                    builder: (context, modelSnapshot) {
-                      if (modelSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (modelSnapshot.hasError) {
-                        return Center(
-                            child: Text('Error: ${modelSnapshot.error}'));
-                      }
-                      if (!modelSnapshot.hasData ||
-                          modelSnapshot.data!.isEmpty) {
-                        return Center(child: Text('No car models available'));
-                      }
-
-                      final carModels = modelSnapshot.data!;
-                      // Tạo map id -> name từ danh sách car models
-                      final carModelMap = {
-                        for (var carModel in carModels)
-                          carModel.id: carModel.name
-                      };
-
-                      return _buildSection(
-                        title: "Car Specifications",
-                        children: specifications.map((spec) {
-                          final carModelName = carModelMap[spec.carModelId] ??
-                              'Unknown'; // Lấy tên car model
-                          return _buildCarSpecificationItem(spec, carModelName);
-                        }).toList(),
-                      );
-                    },
-                  );
-                },
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final carList = await _apiService.fetchCarDetails(carId);
-                  if (carList.isNotEmpty) {
-                    final car = carList.first;
-                    final sellerName =
-                        await _apiService.fetchSellerName(car.sellerId);
-                    final contactInfo =
-                        await _apiService.fetchContactInfo(car.sellerId);
-
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Contact Information'),
-                        content: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Name: $sellerName'),
-                            Text('Email: ${contactInfo['email']}'),
-                            Text('Phone: ${contactInfo['phone']}'),
-                            Text('Location: ${car.location}'),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('Close'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-                child: Text('Book Now'),
-              ),
-            ],
-          ),
-        ));
+            _buildSpecificationsSection(),
+            _buildCarImageSection2(),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _buildBottomActionBar(context),
+    );
   }
 
-  Widget _buildSection(
-      {required String title, required List<Widget> children}) {
+Widget _buildCarImageSection() {
+  return Container(
+    //margin: EdgeInsets.only(top: 70), // Add margin to create space above
+    height: 250,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      image: DecorationImage(
+        image: NetworkImage('${car['coverImage']}'),
+        fit: BoxFit.cover,
+      ),
+    ),
+  );
+}
+
+  Widget _buildCarDetailsSection() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCarDetailsItem(Car car, Brand brand) {
-    return Card(
-      margin: EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Name: ${car.name}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Brand: ${brand.name}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Year: ${car.year}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Price: \$${car.price}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Status: ${car.status}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Location: ${car.location}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Description: ${car.description}',
-                style: TextStyle(fontSize: 16)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCarConditionItem(CarCondition condition) {
-    return ListTile(
-      title: Text('Status: ${condition.status}'),
-      subtitle: Column(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Km Driven: ${condition.kmDriven} km'),
-          Text('Owners Count: ${condition.ownersCount}'),
-          Text('License Type: ${condition.licenseType}'),
-          Text('Accessories: ${condition.accessories}'),
           Text(
-            'Registration Expiry: ${condition.registrationExpiry != null ? DateFormat.yMMMd().format(condition.registrationExpiry!) : 'N/A'}',
+            car['name'],
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          Text('Origin: ${condition.origin}'),
-          Text('Warranty Policy: ${condition.warrantyPolicy}'),
+          SizedBox(height: 5),
+          Text(
+            car['time'],
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.lightBlueAccent,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            car['description'],
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(height: 25),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              car['price'],
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.blueGrey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCarSpecificationItem(
-      CarSpecification spec, String carModelName) {
-    return Card(
-      margin: EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Version: ${spec.version ?? 'N/A'}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Car Model: $carModelName', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Transmission: ${spec.transmission ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Fuel Type: ${spec.fuelType ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Body Style: ${spec.bodyStyle ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Seats: ${spec.seats ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Drivetrain: ${spec.drivetrain ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Engine Type: ${spec.engineType ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Horsepower: ${spec.horsepower ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Torque: ${spec.torque ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Engine Capacity: ${spec.engineCapacity ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Fuel Consumption: ${spec.fuelConsumption ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Airbags: ${spec.airbags ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Ground Clearance: ${spec.groundClearance ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Doors: ${spec.doors ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Weight: ${spec.weight ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Payload Capacity: ${spec.payloadCapacity ?? 'N/A'}',
-                style: TextStyle(fontSize: 16)),
-          ],
+  Widget _buildSpecificationsSection() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildSpecificationRow('Hãng', '${car['brand']}'),
+          _buildSpecificationRow('Dòng', '${car['model']}'),
+          _buildSpecificationRow('Màu', '${car['color']}'),
+          _buildSpecificationRow('Năm sản xuất', '${car['year']}'),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildSpecificationRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnlargedImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.8),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(10),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  boundaryMargin: EdgeInsets.all(80),
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      image: DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Nút đóng (tùy chọn)
+              Positioned(
+                top: 0,
+                left: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueGrey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: Offset(0, 3), // Đổ bóng theo hướng x và y
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  Widget _buildCarImageSection2() {
+    if (car['detailImage'] != null && car['detailImage'].isNotEmpty) {
+      return Container(
+        height: 250,
+        width: double.infinity,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: car['detailImage'].length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => _showEnlargedImage(context, car['detailImage'][index]),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                width: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.0),
+                  image: DecorationImage(
+                    image: NetworkImage(car['detailImage'][index]),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  Widget _buildBottomActionBar(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed: () => _showSellerInfoDialog(context),
+        child: Text(
+          'MUA NGAY',
+          style: TextStyle(
+            //fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueGrey,
+          minimumSize: Size(double.infinity, 50),
         ),
       ),
     );
   }
+
+  void _showSellerInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            textAlign: TextAlign.center,
+            'Seller Information',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+
+          ),
+
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage('${car['sellerImage']}'),
+              ),
+              SizedBox(height: 16),
+              Text(
+                car['sellerName'],
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+              _buildContactRow(
+                icon: Icons.phone,
+                text: car['phone'],
+                onTap: () => _launchPhone(car['phone']),
+              ),
+              SizedBox(height: 10),
+              _buildContactRow(
+                icon: Icons.email,
+                text: car['email'].length > 25 ? car['email'].substring(0, 25) + '...' : car['email'],
+                onTap: () => _launchEmail(car['email']),
+              ),
+              SizedBox(height: 10),
+              _buildContactRow(
+                icon: Icons.location_on,
+                text: car['location'].length > 25 ? car['location'].substring(0, 25) + '...' : car['location'],
+                onTap: () => _launchLocation(car['location']),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Đóng',
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Xử lý logic mua xe ở đây
+                Navigator.pop(context, );
+                // Ví dụ: chuyển đến trang thanh toán hoặc thực hiện giao dịch
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey, // Màu nền nút
+                foregroundColor: Colors.white, // Màu chữ
+              ),
+              child: Text('MUA'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Phương thức tạo dòng thông tin liên hệ
+  Widget _buildContactRow({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blueGrey),
+          SizedBox(width: 20),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.blueGrey,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+// Phương thức gọi điện thoại
+  void _launchPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri.parse('tel:$phoneNumber');
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      print('Could not launch phone app');
+    }
+  }
+
+// Phương thức gửi email
+  void _launchEmail(String email) async {
+    final Uri emailUri = Uri.parse('mailto:$email');
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      print('Could not launch email app');
+    }
+  }
+
+  void _launchLocation(String location) async {
+    // Mã hóa địa chỉ để sử dụng trong URL
+    String encodedLocation = Uri.encodeComponent(location);
+
+    // URL của Google Maps
+    final Uri mapUri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$encodedLocation'
+    );
+
+    try {
+      // Kiểm tra và mở URL
+      if (await canLaunchUrl(mapUri)) {
+        await launchUrl(
+          mapUri,
+          mode: LaunchMode.externalApplication, // Mở trực tiếp trong ứng dụng Google Maps
+        );
+      } else {
+        // Xử lý khi không thể mở Maps
+        print('Không thể mở bản đồ. Vui lòng kiểm tra ứng dụng Google Maps');
+      }
+    } catch (e) {
+      // Xử lý lỗi
+      print('Lỗi khi mở bản đồ: $e');
+
+    }
+  }
+
 }

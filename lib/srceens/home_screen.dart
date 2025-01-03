@@ -2,57 +2,24 @@ import 'package:do_an_app/srceens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'car_detail_screen.dart';
 import 'add_car_screen.dart';
-import 'seach_screen.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../models/car.dart';
-import 'notifications_screen.dart';
-import '../services/api_service.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int currentIndex = 0;
   int currentPage = 1;
   int itemsPerPage = 2;
 
-  List<Car> cars = [];
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _fetchCars();
   }
-
-  Future<void> _fetchCars() async {
-    try {
-      final ApiService apiService = ApiService();
-      final fetchedCars = await apiService.fetchCars();
-
-      // Lọc xe theo trạng thái 'Đang bán' hoặc 'Đã bán'
-      final filteredCars = fetchedCars.where((car) {
-        return car.status == 'Đang bán' || car.status == 'Đã bán';
-      }).toList();
-
-      setState(() {
-        cars = filteredCars;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching cars: $e');
-    }
-  }
-
   // Phương thức để làm mới danh sách xe
   Future<void> _refreshCarList() async {
     // Giả lập việc tải lại dữ liệu
@@ -62,42 +29,84 @@ class _HomeScreenState extends State<HomeScreen>
       // Ví dụ: cars = fetchCarsFromApi();
     });
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
+  final List<Map<String, dynamic>> cars = [
+    {
+      'name': 'Toyota Camry',
+      'time': '20:30 | 25 tháng 12, 2024',
+      'price': '700 triệu',
+
+      'brand': 'Toyota',
+      'year': 2018,
+      'description': 'Xe gia đình, bảo dưỡng định kỳ, nội thất đẹp.',
+      'model': 'Sedan',
+      'color': 'Gray',
+      'sellerName': 'Phát',
+      'phone': '0334551345',
+      'email': 'vuthanhphat2003@gmail.com',
+      'location': '38 Đ. Thảo Điền, Thảo Điền, Quận 2, Hồ Chí Minh, Vietnam',
+      'coverImage': 'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+      'detailImage': [
+         'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+          'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      ],
+      'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
+    },
+    {
+      'name': 'Mazda 3',
+      'time': '20:30 | 31 tháng 12, 2024',
+      'price': '600 triệu',
+      'brand': 'Mazda',
+      'year': 2020,
+      'description': 'Xe mới đi 20,000 km, không va chạm, bảo hành chính hãng.',
+      'model': 'Sedan',
+      'color': 'Black',
+      'sellerName': 'Thinh',
+      'phone': '0334551675',
+      'email': 'thinh@gmail.com',
+      'location': 'Linh Tây, Thủ Đức',
+      'coverImage': 'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      'detailImage': [
+        'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+        'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      ],
+      'sellerImage': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp'
+    },
+
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFEf8f9fd),
       appBar: currentIndex == 0
           ? AppBar(
-              elevation: 0,
-              backgroundColor: Colors.white,
-              title: Text(
-                'Trang chủ',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24),
-              ),
-              bottom: TabBar(
-                controller: _tabController,
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.blue,
-                tabs: [
-                  Tab(text: 'Danh sách xe'),
-                  Tab(text: 'Xe yêu thích'),
-                ],
-              ),
-            )
+        elevation: 0,
+        backgroundColor: Color(0xFFf8f9fd),
+        title: Text(
+          'Trang chủ',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.lightBlueAccent,
+          tabs: [
+            Tab(text: 'Danh sách xe'),
+            Tab(text: 'Xe chờ mua'),
+          ],
+        ),
+      )
           : AppBar(
-              title: Text('AutoCar'),
-              backgroundColor: Colors.blue,
-            ),
+        title: Text('AutoCar'),
+        backgroundColor: Colors.blueGrey,
+      ),
       body: IndexedStack(
         index: currentIndex,
         children: [
@@ -105,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen>
           TabBarView(
             controller: _tabController,
             children: [
+
+
               _buildCarList(),
               Center(
                 child: Text(
@@ -142,28 +153,25 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+
         currentIndex: currentIndex,
         onTap: (index) {
-          if (index == 1) {
-            // Khi nhấn nút Thêm
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (_) => SearchScreen(cars: cars)),
-            // );
-          } else if (index == 2) {
-            // Khi nhấn nút Thêm
+          if (index == 1) { // Khi nhấn nút Thêm
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SearchScreen(cars: cars)),
+            );
+          }else if (index == 2) { // Khi nhấn nút Thêm
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => AddCarScreen()),
             );
-          } else if (index == 3) {
-            // Mục Cá nhân
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => NotificationsScreen()),
-            );
-          } else if (index == 4) {
-            // Mục Cá nhân
+          // } else if (index == 3) { // Mục Cá nhân
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(builder: (_) => ProfileScreen()),
+          //   );
+          } else if (index == 4) { // Mục Cá nhân
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => ProfileScreen()),
@@ -178,143 +186,134 @@ class _HomeScreenState extends State<HomeScreen>
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Tìm kiếm'),
           BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: 'Thêm'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications), label: 'Thông báo'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Thông báo'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
         ],
-        selectedItemColor: Colors.blue,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.lightBlueAccent,
         unselectedItemColor: Colors.grey,
       ),
     );
   }
 
   Widget _buildCarList() {
-    // Sắp xếp theo thời gian mới nhất
-    cars.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: cars.length,
-      itemBuilder: (context, index) {
-        final car = cars[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12.0),
-            // leading: _buildCarImage(car.imageUrl), // Ảnh xe
-            title: Row(
-              children: [
-                const Icon(Icons.directions_car, color: Colors.green),
-                const SizedBox(width: 8),
-                Text(
-                  car.name,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.attach_money, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Text('${car.price}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Text('${car.year}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.red),
-                    const SizedBox(width: 8),
-                    Text('${car.location}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.date_range, color: Colors.purple),
-                    const SizedBox(width: 8),
-                    Text('${car.createdAt}'),
-                  ],
-                ),
-              ],
-            ),
-            // Sự kiện click vào ListTile
-            onTap: () {
-              // Chuyển đến trang chi tiết và truyền car_id qua route
-              if (car.carId != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CarDetailScreen(carId: car.carId!),
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: cars.length,
+            itemBuilder: (context, index) {
+              final car = cars[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CarDetailScreen(car: car),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
                   ),
-                );
-              } else {
-                // Xử lý trường hợp car.id là null nếu cần
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Car ID is null')),
-                );
-              }
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Hình ảnh lớn ở giữa
+                      _buildLargeCarImage(car['coverImage']),
+
+                      // Thông tin xe
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: ListTile(
+                          title: Text(
+                            car['name'],
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          subtitle: Text('${car['brand']} - ${car['year']}'),
+                          trailing: Text(
+                            car['price'],
+                            style:TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.lightBlueAccent),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CarDetailScreen(car: car),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
-  Widget _buildCarImage(String? imageUrl) {
+  Widget _buildLargeCarImage(String imageUrl) {
     return Container(
-      width: 80,
-      height: 80,
+      width: double.infinity,
+      height: 250, // Tăng chiều cao của hình ảnh
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+            blurRadius: 10,
+            offset: Offset(0, 5),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: imageUrl != null
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _placeholderImage(),
-              )
-            : _placeholderImage(),
-      ),
-    );
-  }
-
-  Widget _placeholderImage() {
-    return Container(
-      color: Colors.grey[300],
-      child: const Icon(
-        Icons.directions_car,
-        color: Colors.grey,
-        size: 40,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey[300],
+              child: Center(
+                child: Icon(
+                  Icons.directions_car,
+                  color: Colors.grey[600],
+                  size: 100,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -347,4 +346,10 @@ class _HomeScreenState extends State<HomeScreen>
   //     ],
   //   );
   // }
+
+
 }
+
+
+
+
