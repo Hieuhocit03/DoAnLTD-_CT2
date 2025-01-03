@@ -1,258 +1,201 @@
-import 'package:do_an_app/srceens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
-import '../models/user.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'edit_profile_screen.dart';
-
+//import 'home_screen.dart';
+import 'car_detail_screen.dart';
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  User? _user; // Lưu trữ thông tin người dùng
-  String? userId;
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // Thông tin người dùng mẫu
+  final Map<String, dynamic> userProfile = {
+    'avatar': 'https://www.austinclinic.com.au/wp-content/uploads/2023/02/What-Do-Men-Want-In-2023.webp',
+    'name': 'Hieu Nguyen',
+    'email': 'nguyenhiu@gmail.com',
+    'phone': '0334000345',
+    'location': 'Hanoi, Vietnam',
+  };
+
+  // Danh sách xe đang bán
+  final List<Map<String, dynamic>> sellingCars = [
+    {
+      'name': 'Toyota Camry',
+      'price': '700 triệu',
+      'brand': 'Toyota',
+      'year': '2020',
+      'coverImage': 'https://giaxeoto.vn/admin/upload/images/resize/640-gia-xe-toyota-camry.jpg',
+    },
+    {
+      'name': 'Mazda 3',
+      'price': '600 triệu',
+      'brand': 'Mazda',
+      'year': '2019',
+      'coverImage': 'https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+    }
+  ];
+
+  // Danh sách xe đã bán
+  final List<Map<String, dynamic>> soldCars = [
+    {
+      'name': 'Honda Civic',
+      'price': '500 triệu',
+      'brand': 'Honda',
+      'year': '2018',
+      'coverImage': 'https://https://cms.anycar.vn/wp-content/uploads/2023/12/fe64ed52-20231221_033028.jpg',
+      'buyer': {
+        'name': 'Trần Văn B',
+        'avatar': 'https://example.com/avatar.jpg',
+        'review': 'Xe rất tốt, đáp ứng đúng nhu cầu của tôi. Máy móc hoạt động êm ái và tiết kiệm nhiên liệu.',
+        'rating': 4.5,
+        'purchaseDate': '15/12/2023'
+      }
+    }
+  ];
 
   @override
   void initState() {
     super.initState();
-    _getTokenAndDecode();
-  }
-
-  Future<void> _getTokenAndDecode() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token =
-        prefs.getString('token'); // Giả sử bạn đã lưu token với key là 'token'
-    if (token != null) {
-      print("Token: $token");
-      try {
-        // Giải mã token để lấy thông tin userId
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        print("Token: $decodedToken");
-        setState(() {
-          // Kiểm tra xem có trường 'id' trong token không
-          userId = decodedToken.containsKey('id')
-              ? decodedToken['id'].toString() // Chuyển 'id' từ int sang String
-              : '30';
-        });
-        _fetchUserData(userId);
-      } catch (e) {
-        print("Lỗi khi giải mã token: $e");
-        setState(() {
-          userId = "20";
-        });
-      }
-    } else {
-      print('Token không tồn tại');
-      setState(() {
-        userId = null;
-      });
-    }
-  }
-
-  Future<void> _fetchUserData(String? userId) async {
-    if (userId != null) {
-      // Chuyển userId từ String thành int
-      int? userIdInt = int.tryParse(userId);
-      print("$userIdInt");
-
-      // Kiểm tra xem chuyển đổi có thành công không
-      if (userIdInt != null) {
-        try {
-          final response = await http.get(
-            Uri.parse(
-                'http://10.0.122.239:3000/api/users/users/$userId'), // Sử dụng userIdInt đã chuyển đổi
-          );
-
-          // Kiểm tra mã trạng thái phản hồi từ API
-          if (response.statusCode == 200) {
-            final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-            // Kiểm tra xem có dữ liệu 'user' khôn
-            if (responseData.containsKey('user') &&
-                responseData['user'] != null) {
-              final userData =
-                  responseData['user']; // Lấy đối tượng user từ API
-
-              // Cập nhật trạng thái với dữ liệu người dùng
-              setState(() {
-                _user = User.fromJson(
-                    userData); // Chuyển đối tượng 'user' thành đối tượng User
-              });
-            } else {
-              print('Không có dữ liệu người dùng hoặc dữ liệu không hợp lệ');
-            }
-          } else {
-            print(
-                'Không thể lấy dữ liệu người dùng. Mã lỗi: ${response.statusCode}');
-          }
-        } catch (e) {
-          print('Lỗi khi gọi API: $e');
-        }
-      } else {
-        print('userId không hợp lệ'); // Nếu không thể chuyển đổi thành int
-      }
-    }
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blueGrey,
-        title: Text(
-          'Thông tin cá nhân',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // Phần ảnh bìa và ảnh đại diện
-          Stack(
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _editProfile() {
+    // Logic chỉnh sửa thông tin
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Chỉnh sửa thông tin'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                        'assets/image/bg.png'), // Đường dẫn tới hình nền
-                    fit: BoxFit.cover, // Bao phủ toàn bộ vùng
-                    colorFilter: ColorFilter.mode(
-                      Color.fromRGBO(255, 255, 255,
-                          0.6), // Màu trắng với độ trong suốt 60%
-                      BlendMode.srcOver, // Kết hợp lớp phủ với hình ảnh
-                    ),
-                  ),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Tên',
+                  border: OutlineInputBorder(),
                 ),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Text(
-                          _user?.name ?? 'Tên Người dùng',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        child: CircleAvatar(
-                          radius: 48,
-                          backgroundImage: AssetImage(
-                              'assets/image/avatar.png'), // Đường dẫn ảnh đại diện
-                        ),
-                      ),
-                    ),
-                  ],
+              ),
+              SizedBox(height: 10),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Số điện thoại',
+                  border: OutlineInputBorder(),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 30),
-          // Tên và email người dùng
-          Text(
-            _user?.email ?? 'Tên Tài khoản',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Lưu thông tin
+                Navigator.pop(context);
+              },
+              child: Text('Lưu'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      backgroundColor: Color(0xFFEf8f9fd),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Quay lại màn hình trước đó
+          },
+        ),
+        title: Text('Hồ Sơ Cá Nhân',style:TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blueGrey,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit, color: Colors.white),
+            onPressed: _editProfile,
           ),
-          SizedBox(height: 5),
-          Text(
-            _user?.phone ?? 'email@example.com',
-            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-          ),
-          SizedBox(height: 20),
-          // Danh sách các mục
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Phần thông tin cá nhân
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                _buildProfileOption(Icons.person, 'Hồ sơ cá nhân', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
-                    ),
-                  );
-                }),
-                Divider(color: Colors.grey[300]),
-                _buildProfileOption(Icons.notifications, 'Thông báo', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
-                    ),
-                  );
-                }),
-                Divider(color: Colors.grey[300]),
-                _buildProfileOption(Icons.help, 'Trợ giúp', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
-                    ),
-                  );
-                }),
-                Divider(color: Colors.grey[300]),
-                _buildProfileOption(Icons.info, 'Giới thiệu', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
-                    ),
-                  );
-                }),
-                Divider(color: Colors.grey[300]),
-                _buildProfileOption(Icons.swap_horiz, 'Chuyển tài khoản', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
-                    ),
-                  );
-                }),
+                CircleAvatar(
+                  radius: 85,
+                  backgroundImage: NetworkImage(userProfile['avatar']),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  userProfile['name'],
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  userProfile['email'],
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  userProfile['phone'],
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  userProfile['location'],
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           ),
-          // Nút Đăng Xuất
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
-              child: Text(
-                'Đăng Xuất',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold, // In đậm
-                  color: Colors.white, // Màu trắng
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(0, 0, 0, 0.7), // Màu đỏ đậm
-                padding: EdgeInsets.symmetric(vertical: 16),
-                textStyle: TextStyle(fontSize: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minimumSize: Size(200, 50),
-              ),
+
+          // TabBar
+          TabBar(
+            controller: _tabController,
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.lightBlueAccent,
+            tabs: [
+              Tab(text: 'Xe Đang Bán'),
+              Tab(text: 'Xe Đã Bán'),
+            ],
+          ),
+
+          // Nội dung TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Xe Đang Bán
+                _buildCarList(sellingCars),
+
+                // Xe Đã Bán
+                _buildCarList2(soldCars),
+              ],
             ),
           ),
         ],
@@ -260,14 +203,229 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.blue[800]),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: 16),
+  Widget _buildCarList(List<Map<String, dynamic>> cars)  {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: cars.length, // Hiển thị tất cả các xe
+            itemBuilder: (context, index) {
+              final car = cars[index]; // Dùng trực tiếp danh sách cars
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(12.0),
+                  leading: _buildCarImage(car['coverImage']),
+                  title: Text(
+                    car['name'],
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  subtitle: Text('${car['brand']} - ${car['year']}'),
+                  trailing: Text(
+                    car['price'],
+                    style:TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.lightBlueAccent),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CarDetailScreen(car: car),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _buildCarList2(List<Map<String, dynamic>> cars) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: cars.length,
+            itemBuilder: (context, index) {
+              final car = cars[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thông tin xe
+                    ListTile(
+                      contentPadding: const EdgeInsets.all(12.0),
+                      leading: _buildCarImage(car['coverImage']),
+                      title: Text(
+                        car['name'],
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      subtitle: Text('${car['brand']} - ${car['year']}'),
+                      trailing: Text(
+                        car['price'],
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.lightBlueAccent
+                        ),
+                      ),
+                    ),
+
+                    // Thông tin người mua
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundImage: NetworkImage(car['buyer']['avatar']),
+                          ),
+                          SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                car['buyer']['name'],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16
+                                ),
+                              ),
+                              Text(
+                                'Ngày mua: ${car['purchaseDate']}',
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Nhận xét của người mua
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Nhận xét',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              car['buyer']['review'],
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 15
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.star, color: Colors.amber, size: 20),
+                                Text(
+                                  ' ${car['buyer']['rating']}/5',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCarImage(String imageUrl) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
-      onTap: onTap, // Thêm hàm onTap để chuyển đến trang chỉnh sửa
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey[300],
+              child: Icon(
+                Icons.directions_car,
+                color: Colors.grey[600],
+                size: 40,
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
