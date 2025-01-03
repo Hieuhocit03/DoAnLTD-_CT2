@@ -1,24 +1,24 @@
 class User {
   final int? userId;
-  final String role;
-  final String name;
+  final String? role;
+  final String? name;
   final String email;
   final String password;
   final String? phone;
-  final String status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  String status;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   User({
     this.userId,
-    required this.role,
-    required this.name,
+    this.role,
+    this.name,
     required this.email,
     required this.password,
     this.phone,
     this.status = 'active',
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -44,8 +44,8 @@ class User {
       'password': password,
       'phone': phone,
       'status': status,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'created_at': createdAt!.toIso8601String(),
+      'updated_at': updatedAt!.toIso8601String(),
     };
   }
 }
