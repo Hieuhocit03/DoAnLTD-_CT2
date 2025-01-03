@@ -52,7 +52,7 @@ class Car {
       name: json['name'],
       brandId: json['brand_id'],
       year: json['year'],
-      price: json['price'],
+      price: (json['price'] as num).toDouble(),
       status: json['status'],
       description: json['description'],
       imageUrl: json['image_url'],

@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/car.dart';
 import 'notifications_screen.dart';
-
+import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -33,17 +33,18 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _fetchCars() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/api/cars'));
-      if (response.statusCode == 200) {
-        final List<dynamic> carData = json.decode(response.body);
-        setState(() {
-          cars = carData.map((json) => Car.fromJson(json)).toList();
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load cars');
-      }
+      final ApiService apiService = ApiService();
+      final fetchedCars = await apiService.fetchCars();
+
+      // Lọc xe theo trạng thái 'Đang bán' hoặc 'Đã bán'
+      final filteredCars = fetchedCars.where((car) {
+        return car.status == 'Đang bán' || car.status == 'Đã bán';
+      }).toList();
+
+      setState(() {
+        cars = filteredCars;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -211,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(12.0),
-            leading: _buildCarImage(car.imageUrl), // Ảnh xe
+            // leading: _buildCarImage(car.imageUrl), // Ảnh xe
             title: Row(
               children: [
                 const Icon(Icons.directions_car, color: Colors.green),

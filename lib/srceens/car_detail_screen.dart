@@ -153,6 +153,43 @@ class CarDetailScreen extends StatelessWidget {
                   );
                 },
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  final carList = await _apiService.fetchCarDetails(carId);
+                  if (carList.isNotEmpty) {
+                    final car = carList.first;
+                    final sellerName =
+                        await _apiService.fetchSellerName(car.sellerId);
+                    final contactInfo =
+                        await _apiService.fetchContactInfo(car.sellerId);
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Contact Information'),
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Name: $sellerName'),
+                            Text('Email: ${contactInfo['email']}'),
+                            Text('Phone: ${contactInfo['phone']}'),
+                            Text('Location: ${car.location}'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                child: Text('Book Now'),
+              ),
             ],
           ),
         ));

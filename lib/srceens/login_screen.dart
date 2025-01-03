@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/user.dart';
 import 'register_screen.dart';
@@ -7,7 +8,7 @@ import 'home_screen.dart';
 import 'forgotpass_screen.dart';
 
 class LoginScreen extends StatelessWidget {
-  final String apiUrl = "http://localhost:3000/api/users/login";
+  final String apiUrl = "http://10.0.122.239:3000/api/users/login";
 
   Future<void> login(User user, BuildContext context) async {
     try {
@@ -26,6 +27,8 @@ class LoginScreen extends StatelessWidget {
       // Kiểm tra phản hồi từ API
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['token']);
         print('Đăng nhập thành công: $data');
         Navigator.pushReplacement(
           context,

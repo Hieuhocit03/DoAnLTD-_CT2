@@ -157,3 +157,31 @@ export const updateCar = (req, res) => {
     }
   );
 };
+
+export const updateCarStatus = (req, res) => {
+  const { car_id, status } = req.body; // Lấy car_id và status từ body request
+
+  if (!car_id || !status) {
+    return res.status(400).json({ message: "car_id và status là bắt buộc." });
+  }
+
+  // Câu lệnh SQL để cập nhật trạng thái xe
+  const query = "UPDATE cars SET status = ? WHERE car_id = ?";
+
+  db.query(query, [status, car_id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ message: "Có lỗi khi cập nhật trạng thái." });
+    }
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy bài đăng với car_id này." });
+    }
+
+    return res.status(200).json({ message: "Cập nhật trạng thái thành công." });
+  });
+};

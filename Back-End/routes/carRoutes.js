@@ -5,6 +5,7 @@ import {
   addCar,
   deleteCar,
   updateCar,
+  updateCarStatus,
 } from "../controllers/carControllers.js";
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.delete("/:id", deleteCar);
 
 // Sửa thông tin xe
 router.put("/:id", updateCar);
+router.put("/cars/status", updateCarStatus);
 
 export default router;
