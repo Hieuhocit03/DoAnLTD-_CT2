@@ -1,3 +1,4 @@
+import 'package:do_an_app/srceens/car_list_admin.dart';
 import 'package:do_an_app/srceens/user_list_admin.dart';
 import 'package:do_an_app/srceens/user_unlock_admin.dart';
 import 'package:do_an_app/srceens/profile_screen.dart';
@@ -18,10 +19,13 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
       _selectedIndex = index;
     });
 
-    if (index == 1) { // Index 1 tương ứng với "Cài đặt"
+    if (index == 1) {
+      // Index 1 tương ứng với "Cài đặt"
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ProfileScreen()), // Điều hướng tới ProfileScreen
+        MaterialPageRoute(
+            builder: (context) =>
+                ProfileScreen()), // Điều hướng tới ProfileScreen
       );
     }
   }
@@ -91,7 +95,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                 ListTile(
                   title: Text('Duyệt trạng thái bài viết'),
                   onTap: () {
-                    // Navigate to post status management page
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => CarListPage()));
                   },
                 ),
                 ListTile(

@@ -5,7 +5,7 @@ class User {
   final String email;
   final String password;
   final String? phone;
-  final String status;
+  String status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 

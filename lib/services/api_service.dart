@@ -7,9 +7,101 @@ import '../models/car_condition.dart';
 import '../models/car_specifications.dart';
 import '../models/brand.dart';
 import '../models/car_models.dart';
+import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api/';
+  static const String baseUrl = 'http://10.0.122.239:3000/api/';
+
+  Future<List<Car>> fetchCars() async {
+    final url = Uri.parse('${baseUrl}cars');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> carData = json.decode(response.body);
+        return carData.map((json) => Car.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load cars');
+      }
+    } catch (e) {
+      throw Exception('Error fetching cars: $e');
+    }
+  }
+
+  // Hàm gọi API để lấy tên người bán
+  Future<String> fetchSellerName(int sellerId) async {
+    final url = Uri.parse('${baseUrl}users/users'); // URL API
+    try {
+      final response = await http.get(url); // Gửi yêu cầu GET
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData =
+            json.decode(response.body); // Parse JSON
+        final List<dynamic> users =
+            jsonData['data']; // Lấy danh sách người dùng từ "data"
+
+        final user = users.firstWhere((user) => user['user_id'] == sellerId,
+            orElse: () => null);
+
+        return user != null
+            ? user['name']
+            : 'Unknown'; // Trả về tên người bán nếu tìm thấy, ngược lại trả về 'Unknown'
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      throw Exception('Error fetching seller name: $e');
+    }
+  }
+
+  Future<Map<String, String>> fetchContactInfo(int sellerId) async {
+    final url = Uri.parse('${baseUrl}users/users'); // URL API
+    try {
+      final response = await http.get(url); // Gửi yêu cầu GET
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData =
+            json.decode(response.body); // Parse JSON
+        final List<dynamic> users =
+            jsonData['data']; // Lấy danh sách người dùng từ "data"
+
+        final user = users.firstWhere((user) => user['user_id'] == sellerId,
+            orElse: () => null);
+
+        if (user != null) {
+          // Trả về thông tin email và số điện thoại dưới dạng Map
+          return {
+            'email': user['email'] ?? 'N/A',
+            'phone': user['phone'] ?? 'N/A',
+          };
+        } else {
+          return {
+            'email': 'N/A',
+            'phone': 'N/A',
+          };
+        }
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      throw Exception('Error fetching contact info: $e');
+    }
+  }
+
+  Future<void> updateCarStatus(int carId, String status) async {
+    final url = Uri.parse('${baseUrl}cars/cars/status');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'car_id': carId,
+        'status': status,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update car status');
+    }
+  }
 
   // Fetch Car Details
   Future<List<Car>> fetchCarDetails(int carId) async {
@@ -76,7 +168,7 @@ class ApiService {
   Future<List<CarModel>> fetchCarModelNames() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:3000/api/car-models'));
+          await http.get(Uri.parse('http://10.0.122.239:3000/api/car-models'));
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load car models');
@@ -126,7 +218,7 @@ class ApiService {
   }
 
   Future<http.Response> postCarConditionData(CarCondition carCondition) async {
-    final Uri url = Uri.parse('http://localhost:3000/api/car-conditions');
+    final Uri url = Uri.parse('http://10.0.122.239:3000/api/car-conditions');
 
     var carConditionJson = carCondition.toJson();
     var response = await http.post(url,
@@ -138,7 +230,8 @@ class ApiService {
 
   Future<http.Response> postCarSpecifications(
       CarSpecification carSpecification) async {
-    final Uri url = Uri.parse('http://localhost:3000/api/car-specifications');
+    final Uri url =
+        Uri.parse('http://10.0.122.239:3000/api/car-specifications');
 
     // Chuyển đổi đối tượng CarSpecification thành JSON
     var carSpecificationJson = carSpecification.toJson();
@@ -152,5 +245,16 @@ class ApiService {
 
     // Trả về phản hồi
     return response;
+  }
+
+  static Future<List<User>> fetchUsers() async {
+    final response = await http.get(Uri.parse('${baseUrl}users/users'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body)['data'];
+      return data.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load users');
+    }
   }
 }
